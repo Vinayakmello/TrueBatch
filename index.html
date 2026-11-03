@@ -813,6 +813,31 @@
     .cat .ex { font-size: 12.5px; }
   }
 
+  /* ---------- FAQ: plain, centred, hairline rows ---------- */
+  .faq { background: var(--color-bg); padding: var(--section-y) var(--gutter); }
+  .faq-in { max-width: 920px; margin: 0 auto; }
+  .faq h2 { text-align: center; font-family: var(--font-display); font-weight: 500; font-size: var(--text-h1); line-height: 1.04; letter-spacing: var(--tracking-display); }
+  .faq-list { margin-top: var(--space-16); border-top: 1px solid var(--hairline); }
+  .qa { border-bottom: 1px solid var(--hairline); }
+  .qa-q {
+    width: 100%; display: flex; justify-content: space-between; align-items: center; gap: var(--space-6);
+    padding: 26px 4px; background: none; border: 0; cursor: pointer; text-align: left; color: var(--color-text);
+    font-family: var(--font-display); font-weight: 600; font-size: 1.125rem; letter-spacing: -0.01em; line-height: 1.35;
+  }
+  .qa-q:focus-visible { outline: 2px solid var(--color-focus-ring); outline-offset: 2px; border-radius: var(--r-inner); }
+  .qa-ic { flex: none; width: 18px; height: 18px; color: var(--tb-gray-900); transition: transform 0.4s var(--ease-reveal); }
+  .qa-ic svg { width: 100%; height: 100%; display: block; }
+  .qa.is-open .qa-ic { transform: rotate(45deg); }
+  .qa-a { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.35s var(--ease-reveal); }
+  .qa.is-open .qa-a { grid-template-rows: 1fr; }
+  .qa-a > div { overflow: hidden; }
+  .qa-a p { padding: 0 64px 26px 4px; font-size: var(--text-base); line-height: 1.6; color: var(--color-text-secondary); max-width: 64ch; }
+  @media (max-width: 900px) {
+    .faq-list { margin-top: var(--space-10); }
+    .qa-q { font-size: 1rem; padding: 20px 0; }
+    .qa-a p { padding: 0 0 20px; }
+  }
+
   /* ---------- Closing CTA + footer ---------- */
   .end { position: relative; overflow: clip; background: var(--tb-forest-800); color: var(--tb-cream-50); padding: clamp(5rem, 12vw, 10rem) var(--gutter); }
   .end-papers { position: absolute; inset: 0; pointer-events: none; }
@@ -959,6 +984,9 @@
   /* Buttons: one family. Sizes 52 / 40 / 34. Variants: primary (lime), dark (in-product), outline. */
   .btn { height: 40px; padding: 0 20px; gap: 10px; border-radius: var(--r-pill); justify-content: center; font-size: 0.9375rem; line-height: 1; white-space: nowrap; }
   .btn--lg { height: 52px; padding: 0 26px; gap: 12px; font-size: var(--text-base); }
+  .btn--dark { background: var(--tb-forest-800); color: #fff; }
+  .btn--dark:hover { background: var(--tb-forest-700); }
+  .btn svg { width: 16px; height: 16px; }
   .nav-cta .btn { height: 40px; padding: 0 18px; gap: 10px; }
   .tbw-btn, .approve, .coa, .add, .m-cta, .tb-w .tbw-btn, .lots .go, .m-phone .btn-sm, .m-field .b, .setup .submit { border-radius: var(--r-pill); }
   .tbw-btn { height: 40px; padding: 0 8px 0 6px; }
@@ -1578,12 +1606,48 @@
     </div>
   </section>
 
+  <section class="faq" id="faq" aria-labelledby="faq-title">
+    <div class="faq-in">
+      <h2 id="faq-title">Common questions</h2>
+      <div class="faq-list">
+          <div class="qa">
+            <h3><button class="qa-q" id="qq-0" aria-expanded="false" aria-controls="qa-0">Is TrueBatch a lab, or a certification?<span class="qa-ic"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M9 2v14M2 9h14"/></svg></span></button></h3>
+            <div class="qa-a" id="qa-0" role="region" aria-labelledby="qq-0"><div><p>No. TrueBatch doesn’t test products and doesn’t certify them. It works with the lab reports you already commission, and publishes their results as the laboratory reported them.</p></div></div>
+          </div>
+          <div class="qa">
+            <h3><button class="qa-q" id="qq-1" aria-expanded="false" aria-controls="qa-1">Do I need to change labs or re-test anything?<span class="qa-ic"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M9 2v14M2 9h14"/></svg></span></button></h3>
+            <div class="qa-a" id="qa-1" role="region" aria-labelledby="qq-1"><div><p>No. Start with the certificate of analysis (COA) PDFs your lab already sends. TrueBatch turns them into structured drafts, so the testing you’ve already paid for becomes readable on your store.</p></div></div>
+          </div>
+          <div class="qa">
+            <h3><button class="qa-q" id="qq-2" aria-expanded="false" aria-controls="qa-2">What if the extraction gets something wrong?<span class="qa-ic"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M9 2v14M2 9h14"/></svg></span></button></h3>
+            <div class="qa-a" id="qa-2" role="region" aria-labelledby="qq-2"><div><p>Nothing is published automatically. Each extracted value sits beside its line in the original report, and your team checks and approves the draft before it goes live. Anything unclear, like a qualifier, is flagged for a closer look.</p></div></div>
+          </div>
+          <div class="qa">
+            <h3><button class="qa-q" id="qq-3" aria-expanded="false" aria-controls="qa-3">How are “Not Detected”, units and qualifiers handled?<span class="qa-ic"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M9 2v14M2 9h14"/></svg></span></button></h3>
+            <div class="qa-a" id="qa-3" role="region" aria-labelledby="qq-3"><div><p>Exactly as the lab wrote them. “Not Detected” stays “Not Detected”, units aren’t converted, and qualifiers such as “&lt;LOQ” are kept with the value they belong to.</p></div></div>
+          </div>
+          <div class="qa">
+            <h3><button class="qa-q" id="qq-4" aria-expanded="false" aria-controls="qa-4">Where do shoppers see the results?<span class="qa-ic"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M9 2v14M2 9h14"/></svg></span></button></h3>
+            <div class="qa-a" id="qa-4" role="region" aria-labelledby="qq-4"><div><p>On your Shopify product pages, on a public results page for each lot, through a QR code printed on your packaging, and, if you turn it on, through lot lookup. Every view links back to the original lab report.</p></div></div>
+          </div>
+          <div class="qa">
+            <h3><button class="qa-q" id="qq-6" aria-expanded="false" aria-controls="qa-6">What happens when we test the next batch?<span class="qa-ic"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M9 2v14M2 9h14"/></svg></span></button></h3>
+            <div class="qa-a" id="qa-6" role="region" aria-labelledby="qq-6"><div><p>Upload the new report and it follows the same extract-and-review flow. Earlier lots keep their results and original reports, so a shopper with an older pack still finds theirs.</p></div></div>
+          </div>
+          <div class="qa">
+            <h3><button class="qa-q" id="qq-7" aria-expanded="false" aria-controls="qa-7">Do you help with setup?<span class="qa-ic"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M9 2v14M2 9h14"/></svg></span></button></h3>
+            <div class="qa-a" id="qa-7" role="region" aria-labelledby="qq-7"><div><p>Yes. Our team works with you to set up your products and first reports. Use the setup form above to tell us about your store.</p></div></div>
+          </div>
+      </div>
+    </div>
+  </section>
+
   <footer class="foot" data-dark>
     <div class="foot-in">
       <div class="foot-top">
         <div><a class="logo" href="#">TrueBatch</a><p>Lab-results publishing for Shopify brands. Turn the reports you already have into reviewed, readable results.</p></div>
         <nav class="foot-links" aria-label="Footer">
-          <div><b>Product</b><a href="#how">How it works</a><a href="#surfaces">Where results appear</a><a href="#lots">Recurring testing</a><a href="#who">Who it’s for</a></div>
+          <div><b>Product</b><a href="#how">How it works</a><a href="#surfaces">Where results appear</a><a href="#lots">Recurring testing</a><a href="#who">Who it’s for</a><a href="#faq">FAQ</a></div>
           <div><b>Get started</b><a href="#">Install on Shopify</a><a href="#setup">Setup help</a></div>
         </nav>
       </div>
@@ -2070,6 +2134,13 @@
     const reveal = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('is-in'); reveal.unobserve(e.target); } }), { threshold: 0.3 });
     rcards.forEach(c => { spy.observe(c); reduced ? c.classList.add('is-in') : reveal.observe(c); });
   } else rcards.forEach(c => c.classList.add('is-in'));
+
+  // ---------- FAQ accordion ----------
+  document.querySelectorAll('.qa-q').forEach(b => b.addEventListener('click', () => {
+    const open = b.getAttribute('aria-expanded') !== 'true';
+    b.setAttribute('aria-expanded', String(open));
+    b.closest('.qa').classList.toggle('is-open', open);
+  }));
 
   // ---------- Closing: faint reports drift past at different speeds (a quiet echo of the hero) ----------
   const endSec = document.getElementById('start');

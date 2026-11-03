@@ -1,0 +1,171 @@
+<!doctype html>
+<!--
+  TrueBatch page template. Copy this file to /pages/<slug>.html and replace the content.
+  Read TRUEBATCH_PLAYBOOK.md first. Hard rules:
+    - Fonts: Spline Sans (display/headings) + Inter (body) only, via tokens.
+    - Colours: tokens only; lime is a fill for CTAs and highlights, never text on white.
+    - Shape: controls are pills, cards 16px, nested 10px, flat with hairline, one float shadow.
+    - Claims: no pass/fail, no "certified/safe/verified" badges, sample data labelled "Illustrative sample",
+      "Not Detected" kept as written, units as reported, original COA always one click away.
+  Every section below is optional and reorderable. Keep the header and footer on every page.
+-->
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Page title | TrueBatch</title>
+<meta name="description" content="One sentence on what this page helps the reader do.">
+<link rel="stylesheet" href="../tokens/tokens.css">
+<link rel="stylesheet" href="../assets/truebatch.css">
+<script src="../assets/truebatch.js" defer></script>
+</head>
+<body>
+
+<!-- HEADER: keep as is on every page. Set aria-current on the link for this page if it is in the nav. -->
+<header class="nav is-joined">
+  <div class="nav-pill nav-logo">
+    <a class="logo" href="../index.html"><span class="logo-mark" aria-hidden="true">T</span>TrueBatch</a>
+  </div>
+  <div class="nav-pill nav-cta">
+    <a class="nav-link" href="../index.html#how">How it works</a>
+    <a class="btn" href="../index.html#start">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3 5h10l-.8 8.2a1 1 0 0 1-1 .8H4.8a1 1 0 0 1-1-.8L3 5Z"/><path d="M5.5 5V4a2.5 2.5 0 0 1 5 0v1"/></svg>
+      <span>Install on Shopify</span>
+    </a>
+  </div>
+</header>
+
+<main>
+  <!-- 1. PAGE HERO: eyebrow, headline with accented second half, lead, one primary + one outline CTA. Visual on the right. -->
+  <section class="tb-section tb-page-top" aria-labelledby="page-title">
+    <div class="tb-wrap tb-split">
+      <div>
+        <span class="eyebrow">Eyebrow · page topic</span>
+        <h1 class="tb-display" id="page-title">Plain statement first. <span class="tb-accent">The benefit second.</span></h1>
+        <p class="tb-lead">One or two sentences in plain language: what TrueBatch does here, for whom, and why it matters. No hype, no invented numbers.</p>
+        <div class="tb-ctas">
+          <a class="btn btn--lg" href="../index.html#start">Install on Shopify</a>
+          <a class="btn btn--lg btn--outline" href="../index.html#how">See how it works</a>
+        </div>
+      </div>
+      <!-- Visual: product object + shopper widget. Swap the data for this page's product (see the data canon in the playbook). -->
+      <div class="tb-stage" aria-hidden="true" style="min-height:420px">
+        <div class="tb-duo">
+          <div class="tb-tub"><div class="lid"></div><div class="bd"></div><div class="lb">Plant<br>Protein</div></div>
+          <div class="tb-widget is-float">
+            <div class="tb-widget__head"><b>Plant Protein / Vanilla</b><span class="chip is-sm">Lot A2419</span></div>
+            <div class="tb-widget__meta">Tested 12 Sep 2026 · Northfield Analytical</div>
+            <span class="chip is-sm is-sample">Illustrative sample</span>
+            <div class="tb-rows">
+              <div class="tb-row"><b>Lead</b><span>3.2 <span class="u">ppb</span></span></div>
+              <div class="tb-row"><b>Arsenic</b><span>Not Detected</span></div>
+              <div class="tb-row"><b>Cadmium</b><span>1.1 <span class="u">ppb</span></span></div>
+              <div class="tb-row"><b>Mercury</b><span>&lt;0.5 <span class="u">ppb</span></span></div>
+            </div>
+            <a class="btn btn--sm btn--outline" href="#">View original lab report (PDF)</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. CARD GRID: 3 or 4 points. Numbers only for real sequences; otherwise drop .num. -->
+  <section class="tb-section is-cream" aria-labelledby="points-title">
+    <div class="tb-wrap">
+      <div class="tb-center">
+        <span class="eyebrow">Eyebrow</span>
+        <h2 class="tb-h1" id="points-title">Section headline. <span class="tb-accent">Accent half.</span></h2>
+        <p class="tb-lead">Optional one-line lead.</p>
+      </div>
+      <div class="tb-grid cols-3" style="margin-top:var(--space-16)">
+        <article class="tb-card reveal" style="--i:0"><span class="num">01</span><h3>Turn reports into usable data</h3><p>Results, units, qualifiers, dates, product and lot details become a structured draft.</p></article>
+        <article class="tb-card reveal" style="--i:1"><span class="num">02</span><h3>Keep the brand in control</h3><p>Each value is checked against the original report before anything is published.</p></article>
+        <article class="tb-card reveal" style="--i:2"><span class="num">03</span><h3>Publish understandable proof</h3><p>Lot-specific results with the source document one click away.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. STICKY SPLIT: text pinned on the left, evidence on the right (source line vs extracted value). -->
+  <section class="tb-section" aria-labelledby="review-title">
+    <div class="tb-wrap tb-split is-sticky">
+      <div>
+        <span class="eyebrow">Human review</span>
+        <h2 class="tb-h1" id="review-title">Nothing goes live <span class="tb-accent">until it matches the source.</span></h2>
+        <p class="tb-lead">Explain the step in one or two sentences.</p>
+      </div>
+      <div class="tb-stack">
+        <div class="tb-stage reveal">
+          <div class="tb-paper">
+            <span class="k">Source document · illustrative</span>
+            <h4>Laboratory analysis</h4>
+            <div class="tb-widget__meta">Plant Protein · Vanilla / Lot A2419</div>
+            <div class="tb-rows">
+              <div class="tb-row is-hl"><span>Lead</span><b>3.2 ppb</b></div>
+              <div class="tb-row"><span>Arsenic</span><b>ND</b></div>
+              <div class="tb-row"><span>Report date</span><b>12 Sep 2026</b></div>
+            </div>
+          </div>
+        </div>
+        <div class="tb-card reveal"><h3>“Not Detected” stays “Not Detected”</h3><p>Units and qualifiers are kept exactly as the lab reported them.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. FAQ: plain, centred, 4–8 questions. Answers must not claim certification or safety. -->
+  <section class="tb-section" aria-labelledby="faq-title">
+    <div class="tb-narrow">
+      <h2 class="tb-h1 tb-center" id="faq-title">Common questions</h2>
+      <div class="faq-list">
+        <div class="qa">
+          <h3><button class="qa-q" id="q1" aria-expanded="false" aria-controls="a1">Is TrueBatch a lab, or a certification?<span class="qa-ic"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M9 2v14M2 9h14"/></svg></span></button></h3>
+          <div class="qa-a" id="a1" role="region" aria-labelledby="q1"><div><p>No. TrueBatch doesn’t test or certify products. It publishes results from the lab reports you already commission, as the laboratory reported them.</p></div></div>
+        </div>
+        <div class="qa">
+          <h3><button class="qa-q" id="q2" aria-expanded="false" aria-controls="a2">Question two?<span class="qa-ic"><svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M9 2v14M2 9h14"/></svg></span></button></h3>
+          <div class="qa-a" id="a2" role="region" aria-labelledby="q2"><div><p>Answer two.</p></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. CLOSING CTA: brand green, one primary CTA, optional setup form card (prototype: sends nothing). -->
+  <section class="tb-section is-brand tb-cta" aria-labelledby="cta-title">
+    <div class="tb-wrap tb-split">
+      <div>
+        <span class="eyebrow">Get started</span>
+        <h2 id="cta-title">Your lab reports are done. <span class="tb-accent">Put them to work.</span></h2>
+        <p>Install TrueBatch, upload a report you already have, and review it before anything is published.</p>
+        <div class="tb-ctas"><a class="btn btn--lg" href="#">Install on Shopify</a></div>
+      </div>
+      <div class="tb-card is-white" style="padding:32px;color:var(--tb-gray-900)">
+        <h3>Want a hand with setup?</h3>
+        <p>Tell us about your store and we’ll help set up your products and first reports.</p>
+        <form class="tb-form" data-tb-form novalidate style="margin-top:var(--space-6)">
+          <div class="field"><label for="f-email">Work email</label><input id="f-email" type="email" placeholder="you@yourbrand.com" required></div>
+          <div class="field"><label for="f-cat">What do you sell?</label><select id="f-cat"><option>Sports nutrition &amp; protein</option><option>Supplements</option><option>Baby food</option><option>Prenatal &amp; family vitamins</option><option>Something else</option></select></div>
+          <button class="btn btn--lg btn--dark btn--block" type="submit">Request setup help</button>
+        </form>
+        <div class="tb-done" data-tb-done hidden role="status"><b>Thanks, we’ll be in touch.</b><span>Have a recent lab report handy.</span></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- FOOTER: keep as is on every page, including the disclaimer. -->
+<footer class="foot">
+  <div class="tb-wrap">
+    <div class="foot-top">
+      <div><a class="logo" href="../index.html">TrueBatch</a><p>Lab-results publishing for Shopify brands. Turn the reports you already have into reviewed, readable results.</p></div>
+      <nav class="foot-links" aria-label="Footer">
+        <div><b>Product</b><a href="../index.html#how">How it works</a><a href="../index.html#surfaces">Where results appear</a><a href="../index.html#lots">Recurring testing</a><a href="../index.html#who">Who it’s for</a><a href="../index.html#faq">FAQ</a></div>
+        <div><b>Get started</b><a href="../index.html#start">Install on Shopify</a><a href="../index.html#setup">Setup help</a></div>
+      </nav>
+    </div>
+    <div class="foot-bottom">
+      <p>Results shown on this page are illustrative samples. TrueBatch publishes results as reported by your laboratory; it is not a testing laboratory and does not certify products.</p>
+      <span>© 2026 TrueBatch</span>
+    </div>
+  </div>
+</footer>
+</body>
+</html>
