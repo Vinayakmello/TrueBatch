@@ -1,0 +1,181 @@
+/*
+ * TrueBatch — web design tokens
+ * Source: Figma "TrueBatch" style board (node 26:6327), sampled from export.
+ *
+ * Principle: white-first, minimal. Brand greens/lime/sand are ACCENTS —
+ * use sparingly (CTAs, highlights, one feature block per section at most).
+ */
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Spline+Sans:wght@500;600;700&display=swap");
+
+:root {
+  /* ---------- Brand palette (raw) ---------- */
+  --tb-forest-950: #0A2120; /* near-black green — dark sections, footer */
+  --tb-forest-800: #035631; /* primary brand green — logo, headings, links */
+  --tb-forest-700: #016E39; /* secondary green — hover, illustrations */
+  --tb-lime-500:   #00F500; /* signature accent — CTA fill, highlights ONLY */
+  --tb-sand-200:   #E7D9B9; /* warm accent surface — imagery backdrops */
+  --tb-cream-50:   #F4F3EA; /* soft off-white — alt section background */
+  --tb-amber-500:  #F67D1F; /* ratings / stars only */
+
+  /* ---------- Neutrals ---------- */
+  --tb-white:     #FFFFFF;
+  --tb-gray-50:   #FAFAF9;
+  --tb-gray-100:  #F2F2F2;
+  --tb-gray-200:  #ECECEC; /* borders, progress tracks */
+  --tb-gray-400:  #99989B; /* meta text, timestamps */
+  --tb-gray-600:  #5F6067; /* body copy secondary */
+  --tb-gray-900:  #212121; /* body copy primary */
+
+  /* ---------- Semantic (light / default) ---------- */
+  --color-bg:              var(--tb-white);
+  --color-bg-subtle:       var(--tb-cream-50);
+  --color-bg-warm:         var(--tb-sand-200);
+  --color-bg-inverse:      var(--tb-forest-950);
+  --color-bg-brand:        var(--tb-forest-800);
+
+  --color-surface:         var(--tb-white);
+  --color-border:          var(--tb-gray-200);
+  --color-border-strong:   #D9D9D6;
+
+  --color-text:            var(--tb-gray-900);
+  --color-text-secondary:  var(--tb-gray-600);
+  --color-text-muted:      var(--tb-gray-400);
+  --color-text-brand:      var(--tb-forest-800);
+  --color-text-inverse:    var(--tb-cream-50);
+
+  --color-accent:          var(--tb-lime-500);   /* fill only — never text on white */
+  --color-on-accent:       var(--tb-forest-800); /* text/icons on lime (≈6:1) */
+  --color-link:            var(--tb-forest-800);
+  --color-link-hover:      var(--tb-forest-700);
+  --color-success:         var(--tb-forest-700);
+  --color-rating:          var(--tb-amber-500);
+  --color-focus-ring:      var(--tb-forest-700);
+
+  /* ---------- Typography ---------- */
+  --font-display: "Spline Sans", system-ui, sans-serif; /* titles, headlines, logo */
+  --font-body:    "Inter", system-ui, sans-serif;       /* paragraphs, UI */
+
+  --weight-regular:  400;
+  --weight-medium:   500;
+  --weight-semibold: 600;
+  --weight-bold:     700;
+
+  /* fluid display scale (mobile → desktop) */
+  --text-display: clamp(2.75rem, 6vw + 1rem, 5.5rem);   /* 44 → 88 */
+  --text-h1:      clamp(2.25rem, 4vw + 1rem, 4rem);     /* 36 → 64 */
+  --text-h2:      clamp(1.75rem, 2.5vw + 1rem, 2.75rem);/* 28 → 44 */
+  --text-h3:      clamp(1.375rem, 1vw + 1rem, 1.75rem); /* 22 → 28 */
+  --text-h4:      1.25rem;   /* 20 */
+  --text-lg:      1.125rem;  /* 18 */
+  --text-base:    1rem;      /* 16 */
+  --text-sm:      0.875rem;  /* 14 */
+  --text-xs:      0.75rem;   /* 12 */
+
+  --leading-tight:  1.05;  /* display */
+  --leading-snug:   1.2;   /* headings */
+  --leading-normal: 1.55;  /* body */
+
+  --tracking-display: -0.03em; /* Spline Sans headlines run tight */
+  --tracking-heading: -0.015em;
+  --tracking-body:    0;
+
+  /* ---------- Spacing (4px base) — be generous ---------- */
+  --space-1:  0.25rem;
+  --space-2:  0.5rem;
+  --space-3:  0.75rem;
+  --space-4:  1rem;
+  --space-5:  1.25rem;
+  --space-6:  1.5rem;
+  --space-8:  2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+  --space-24: 6rem;
+  --space-32: 8rem;
+
+  --section-y:    clamp(4rem, 8vw, 8rem);
+  --gutter:       clamp(1rem, 4vw, 5rem);  /* board uses ~84px at 2000w */
+  --container-max: 1280px;
+  --grid-gap:     clamp(1rem, 1.5vw, 1.75rem); /* board tiles ~28px apart */
+
+  /* ---------- Radius ---------- */
+  --radius-none: 0;      /* feature tiles & color blocks are square */
+  --radius-xs:   2px;    /* primary button */
+  --radius-sm:   4px;    /* badges */
+  --radius-md:   12px;   /* cards */
+  --radius-lg:   16px;
+  --radius-pill: 999px;  /* progress bars */
+
+  /* ---------- Elevation (keep flat) ---------- */
+  --shadow-none: none;
+  --shadow-sm:   0 1px 2px rgb(10 33 32 / 0.06);
+  --shadow-md:   0 4px 16px rgb(10 33 32 / 0.08);
+
+  /* ---------- Motion ---------- */
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --duration-fast: 120ms;
+  --duration-base: 200ms;
+
+  /* ---------- Components ---------- */
+  --button-bg:        var(--color-accent);
+  --button-fg:        var(--color-on-accent);
+  --button-bg-hover:  #00DC00;
+  --button-radius:    var(--radius-xs);
+  --button-pad-y:     var(--space-4);
+  --button-pad-x:     var(--space-6);
+  --button-font:      var(--font-display);
+  --button-weight:    var(--weight-semibold);
+
+  --button-secondary-bg: transparent;
+  --button-secondary-fg: var(--color-text-brand);
+  --button-secondary-border: var(--color-text-brand);
+
+  --card-bg:     var(--color-surface);
+  --card-border: var(--color-border);
+  --card-radius: var(--radius-md);
+  --card-pad:    var(--space-5);
+
+  --badge-bg: var(--tb-forest-800);
+  --badge-fg: var(--tb-white);
+  --badge-radius: var(--radius-sm);
+}
+
+/* ---------- Dark mode ---------- */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-bg:             var(--tb-forest-950);
+    --color-bg-subtle:      #0F2B29;
+    --color-bg-warm:        #2A2619;
+    --color-bg-inverse:     var(--tb-cream-50);
+    --color-surface:        #102826;
+    --color-border:         #1E3A37;
+    --color-border-strong:  #2C4A46;
+    --color-text:           var(--tb-cream-50);
+    --color-text-secondary: #B9C2BC;
+    --color-text-muted:     #7F8C86;
+    --color-text-brand:     var(--tb-lime-500);
+    --color-text-inverse:   var(--tb-forest-950);
+    --color-link:           var(--tb-lime-500);
+    --color-link-hover:     #6CFF6C;
+    --color-focus-ring:     var(--tb-lime-500);
+  }
+}
+:root[data-theme="dark"] {
+  --color-bg:             var(--tb-forest-950);
+  --color-bg-subtle:      #0F2B29;
+  --color-bg-warm:        #2A2619;
+  --color-bg-inverse:     var(--tb-cream-50);
+  --color-surface:        #102826;
+  --color-border:         #1E3A37;
+  --color-border-strong:  #2C4A46;
+  --color-text:           var(--tb-cream-50);
+  --color-text-secondary: #B9C2BC;
+  --color-text-muted:     #7F8C86;
+  --color-text-brand:     var(--tb-lime-500);
+  --color-text-inverse:   var(--tb-forest-950);
+  --color-link:           var(--tb-lime-500);
+  --color-link-hover:     #6CFF6C;
+  --color-focus-ring:     var(--tb-lime-500);
+}

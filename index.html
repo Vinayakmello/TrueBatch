@@ -1,0 +1,2181 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TrueBatch — Lab results for Shopify brands</title>
+<meta name="description" content="Turn the lab reports you already have into reviewed, lot-specific results on your Shopify store, product pages and packaging.">
+<link rel="stylesheet" href="tokens/tokens.css">
+<style>
+  :root {
+    --ease-reveal: cubic-bezier(0.22, 1, 0.36, 1);
+    --ease-ui: cubic-bezier(0.4, 0, 0.2, 1);
+    --paper-w: clamp(120px, 14vw, 220px);
+    --phone-scale: 1;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  button, input, select, textarea { font: inherit; }
+  html, body { background: var(--color-bg); color: var(--color-text); }
+  body { font-family: var(--font-body); font-variant-numeric: tabular-nums; -webkit-font-smoothing: antialiased; }
+
+  /* ---------- Nav ---------- */
+  /* Two floating pills: joined in the centre at the top of the page, split to the edges once you scroll (after Tinker) */
+  .nav { position: fixed; left: 0; right: 0; top: 16px; height: 54px; z-index: 50; pointer-events: none; }
+  .nav-pill {
+    position: absolute; left: 0; top: 0; height: 54px; border-radius: 29px; pointer-events: auto;
+    display: flex; align-items: center; background: rgb(255 255 255 / 0.94);
+    -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+    border: 1px solid rgb(10 33 32 / 0.08); box-shadow: 0 10px 30px -18px rgb(10 33 32 / 0.35);
+    transition: transform 0.45s var(--ease-ui), width 0.45s var(--ease-ui) 0.08s, border-color 0.3s var(--ease-ui), box-shadow 0.3s var(--ease-ui);
+    will-change: transform;
+  }
+  .nav-logo { padding: 0 18px 0 8px; }
+  .nav-cta { padding: 0 7px 0 18px; gap: 16px; }
+  .nav.is-joined .nav-cta { border-color: transparent; box-shadow: none; background: transparent; -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .nav-link { font-size: var(--text-sm); font-weight: 500; color: var(--tb-gray-600); text-decoration: none; white-space: nowrap; transition: color 0.2s var(--ease-ui); }
+  .nav-link:hover { color: var(--tb-gray-900); }
+  .nav-cta .btn { height: 40px; padding: 0 16px; border-radius: 999px; gap: 8px; white-space: nowrap; }
+  .logo-mark {
+    width: 38px; height: 38px; border-radius: 50%; background: var(--tb-forest-800); color: #fff; flex: none;
+    display: grid; place-items: center; font: 700 17px/1 var(--font-display); letter-spacing: -0.04em; margin-right: 10px;
+  }
+  .logo {
+    display: inline-flex; align-items: center;
+    font-family: var(--font-display); font-weight: 600; font-size: 1.125rem;
+    letter-spacing: -0.02em; color: var(--tb-gray-900); text-decoration: none;
+  }
+  .btn {
+    display: inline-flex; align-items: center; gap: var(--space-3);
+    background: var(--button-bg); color: var(--button-fg);
+    font-family: var(--button-font); font-weight: var(--button-weight);
+    font-size: var(--text-sm); letter-spacing: -0.01em;
+    padding: var(--space-3) var(--space-5); border-radius: var(--button-radius);
+    text-decoration: none; border: 0; cursor: pointer;
+    transition: background var(--duration-base) var(--ease-ui), transform var(--duration-fast) var(--ease-ui);
+  }
+  .btn:hover { background: var(--button-bg-hover); }
+  .btn:active { transform: translateY(1px); }
+  .btn:focus-visible { outline: 2px solid var(--color-focus-ring); outline-offset: 3px; }
+  .btn svg { width: 16px; height: 16px; flex: none; }
+  .btn--lg { font-size: var(--text-base); padding: var(--space-4) var(--space-6); gap: var(--space-8); }
+
+  /* ---------- Hero scroll stage ---------- */
+  .hero { position: relative; height: 520vh; }
+  .stage {
+    position: sticky; top: 0; height: 100vh; height: 100svh;
+    overflow: clip; isolation: isolate;
+  }
+
+  /* Scattered lab reports */
+  .papers { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+  .paper {
+    position: absolute; left: 50%; top: 50%;
+    width: var(--paper-w); aspect-ratio: 1 / 1.3;
+    margin-left: calc(var(--paper-w) / -2);
+    margin-top: calc(var(--paper-w) * -0.65);
+    background: #F3F3F2; border: 1px solid #E9E9E7;
+    box-shadow: 0 1px 2px rgb(10 33 32 / 0.04), 0 8px 24px rgb(10 33 32 / 0.04);
+    padding: calc(var(--paper-w) * 0.09);
+    display: flex; flex-direction: column; gap: calc(var(--paper-w) * 0.05);
+    will-change: transform, opacity;
+  }
+  .paper .row { display: flex; gap: 6%; align-items: center; }
+  .paper .ln { display: block; flex: none; height: max(2px, calc(var(--paper-w) * 0.02)); background: #D2D2CF; border-radius: 1px; }
+  .paper .ln.dk { background: #B4B4B0; }
+  .paper .ln.hd { height: max(3px, calc(var(--paper-w) * 0.032)); background: #9E9E9A; }
+  .paper .mark { width: 13%; aspect-ratio: 1; background: #CFCFCB; border-radius: 2px; flex: none; }
+  .paper .tbl { display: flex; flex-direction: column; justify-content: space-between; margin-top: calc(var(--paper-w) * 0.02); flex: 1; }
+  .paper .tbl .row { justify-content: space-between; }
+  .paper .rule { height: 1px; background: #E2E2DF; }
+
+  /* Copy */
+  .copy {
+    position: absolute; inset: 0; z-index: 2;
+    display: grid; place-content: center; justify-items: center; text-align: center;
+    padding: 0 var(--gutter); will-change: transform, opacity;
+  }
+  .copy h1 {
+    font-family: var(--font-display); font-weight: 500;
+    font-size: var(--text-display); line-height: var(--leading-tight);
+    letter-spacing: var(--tracking-display); max-width: 11ch;
+  }
+  /* soft halo keeps copy legible while reports slide underneath */
+  .copy h1, .copy p { text-shadow: 0 0 24px #fff, 0 0 12px #fff, 0 0 4px #fff; }
+  .copy p {
+    margin-top: var(--space-6); max-width: 34rem;
+    font-size: var(--text-lg); line-height: var(--leading-normal); color: var(--color-text-secondary);
+  }
+  .copy .btn { margin-top: var(--space-10); }
+
+  .scroll-hint {
+    position: absolute; left: 50%; bottom: var(--space-8); z-index: 2; transform: translateX(-50%);
+    font-family: var(--font-body); font-size: var(--text-xs); color: var(--color-text-muted);
+    letter-spacing: 0.04em; display: flex; flex-direction: column; align-items: center; gap: var(--space-2);
+  }
+  .scroll-hint i { width: 1px; height: 28px; background: var(--color-border-strong); position: relative; overflow: hidden; }
+  .scroll-hint i::after {
+    content: ""; position: absolute; inset: 0; background: var(--color-text-secondary);
+    animation: drip 1.8s var(--ease-reveal) infinite;
+  }
+  @keyframes drip { from { transform: translateY(-100%); } to { transform: translateY(100%); } }
+
+  /* ---------- Phone ---------- */
+  .phone-wrap {
+    position: absolute; left: 50%; top: 50%; z-index: 3;
+    width: 320px; height: 660px; margin: -330px 0 0 -160px;
+    will-change: transform, opacity; opacity: 0; pointer-events: none;
+  }
+  .phone-wrap.is-live { pointer-events: auto; }
+  .phone {
+    width: 100%; height: 100%; border-radius: 52px; padding: 11px;
+    background: #111312;
+    box-shadow: inset 0 0 0 1.5px #3A3D3B, 0 30px 60px -20px rgb(10 33 32 / 0.25), 0 12px 24px -12px rgb(10 33 32 / 0.18);
+  }
+  .screen {
+    position: relative; width: 100%; height: 100%; border-radius: 42px; overflow: hidden;
+    background: #fff; color: var(--tb-gray-900); font-size: 13px;
+  }
+  .island { position: absolute; top: 10px; left: 50%; width: 96px; height: 28px; margin-left: -48px; background: #111312; border-radius: 20px; z-index: 6; }
+  .status {
+    height: 50px; padding: 16px 26px 0 30px; display: flex; justify-content: space-between;
+    font-weight: 600; font-size: 14px;
+  }
+  .status .icons { display: flex; gap: 5px; align-items: center; }
+  .status .icons span { display: block; background: currentColor; border-radius: 1px; }
+  .store-bar {
+    display: grid; grid-template-columns: 24px 1fr 24px; align-items: center;
+    padding: 6px 18px 10px; border-bottom: 1px solid var(--tb-gray-200);
+  }
+  .store-bar b { text-align: center; font-family: var(--font-display); font-weight: 600; font-size: 14px; letter-spacing: -0.01em; }
+  .store-bar svg { width: 18px; height: 18px; color: var(--tb-gray-600); }
+  .pdp { padding: 0 0 18px; }
+  .shot {
+    height: 222px; background: var(--tb-cream-50); display: grid; place-items: center; position: relative;
+  }
+  .jar { position: relative; width: 104px; height: 140px; }
+  .jar .lid { position: absolute; left: 10px; right: 10px; top: 0; height: 24px; background: var(--tb-forest-800); border-radius: 6px 6px 3px 3px; }
+  .jar .body {
+    position: absolute; left: 0; right: 0; top: 20px; bottom: 0; background: #fff; border-radius: 14px;
+    box-shadow: inset 0 0 0 1px #E4E2D8, 0 10px 20px -10px rgb(10 33 32 / 0.25);
+    display: grid; place-content: center; text-align: center; gap: 3px;
+  }
+  .jar .body b { font-family: var(--font-display); font-size: 13px; letter-spacing: -0.02em; color: var(--tb-forest-800); }
+  .jar .body small { font-family: var(--font-body); font-size: 8px; color: var(--tb-gray-400); }
+  .dots { position: absolute; bottom: 10px; display: flex; gap: 5px; }
+  .dots i { width: 5px; height: 5px; border-radius: 50%; background: #D3D1C6; }
+  .dots i:first-child { background: var(--tb-gray-900); }
+  .pdp-info { padding: 14px 18px 0; }
+  .pdp-info h3 { font-family: var(--font-display); font-weight: 600; font-size: 18px; letter-spacing: -0.02em; }
+  .pdp-info .meta { display: flex; justify-content: space-between; margin-top: 2px; color: var(--tb-gray-600); }
+  .pdp-info .price { color: var(--tb-gray-900); font-weight: 500; }
+
+  /* TrueBatch widget */
+  .tbw {
+    margin: 14px 18px 0; border: 1px solid var(--tb-gray-200); border-radius: 10px; padding: 12px;
+  }
+  .tbw-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .tbw-label { font-size: 12px; color: var(--tb-gray-600); }
+  .lot {
+    font-family: var(--font-body); font-size: 10.5px; font-weight: 500; letter-spacing: 0.01em;
+    border: 1px solid var(--tb-gray-200); border-radius: 4px; padding: 3px 6px; color: var(--tb-gray-900);
+    display: inline-flex; gap: 4px; align-items: center; white-space: nowrap;
+  }
+  .lot svg { width: 9px; height: 9px; color: var(--tb-gray-400); }
+  .tbw-btn {
+    margin-top: 10px; width: 100%; display: flex; justify-content: space-between; align-items: center;
+    background: var(--tb-forest-800); color: #fff; border: 0; border-radius: 6px;
+    padding: 11px 12px; font: 600 13px/1 var(--font-display); letter-spacing: -0.01em; cursor: pointer;
+    position: relative; transition: background var(--duration-base) var(--ease-ui);
+  }
+  .tbw-btn:hover { background: var(--tb-forest-700); }
+  .tbw-btn:focus-visible { outline: 2px solid var(--tb-lime-500); outline-offset: 2px; }
+  .tbw-btn svg { width: 14px; height: 14px; }
+  .tbw-btn .lbl, .tbw-btn .lbl2 { display: flex; align-items: center; gap: 8px; }
+  .tb-badge {
+    width: 18px; height: 18px; border-radius: 4px; background: #fff; color: var(--tb-forest-800);
+    display: grid; place-items: center; font: 700 11px/1 var(--font-display); letter-spacing: -0.02em; flex: none;
+  }
+  .tbw-btn { transition: background var(--duration-base) var(--ease-ui), transform 0.18s var(--ease-ui); }
+  .tbw-btn.is-press { background: var(--tb-forest-700); transform: scale(0.97); }
+  .tap {
+    position: absolute; right: 22px; top: 50%; width: 30px; height: 30px; margin: -15px -15px 0 0; border-radius: 50%;
+    background: rgb(255 255 255 / 0.55); box-shadow: 0 0 0 1px rgb(255 255 255 / 0.7);
+    opacity: 0; transform: scale(1.5); pointer-events: none;
+    transition: opacity 0.2s var(--ease-ui), transform 0.25s var(--ease-reveal);
+  }
+  .tbw-btn.is-press .tap { opacity: 1; transform: scale(0.8); }
+  .tbw-foot { margin-top: 8px; font-size: 10px; color: var(--tb-gray-400); text-align: center; }
+  .add { margin: 12px 18px 0; height: 40px; border-radius: 6px; background: var(--tb-gray-900); color: #fff; display: grid; place-items: center; font-weight: 600; font-size: 13px; }
+
+  /* Results sheet */
+  .scrim { position: absolute; inset: 0; background: rgb(10 33 32 / 0.32); opacity: 0; pointer-events: none; transition: opacity 0.35s var(--ease-ui); z-index: 4; }
+  .sheet {
+    position: absolute; left: 0; right: 0; bottom: 0; height: 88%; z-index: 5;
+    background: #fff; border-radius: 22px 22px 0 0; transform: translateY(102%);
+    transition: transform 0.6s var(--ease-reveal);
+    display: flex; flex-direction: column;
+  }
+  .screen.is-open .scrim { opacity: 1; pointer-events: auto; }
+  .screen.is-open .sheet { transform: none; }
+  .grab { width: 36px; height: 4px; border-radius: 4px; background: var(--tb-gray-200); margin: 8px auto 0; flex: none; }
+  .sheet-head { padding: 12px 18px 12px; border-bottom: 1px solid var(--tb-gray-200); flex: none; }
+  .sheet-head .t { display: flex; justify-content: space-between; align-items: center; }
+  .sheet-head h4 { font-family: var(--font-display); font-weight: 600; font-size: 16px; letter-spacing: -0.02em; }
+  .x { width: 26px; height: 26px; border-radius: 50%; border: 0; background: var(--tb-gray-100); display: grid; place-items: center; cursor: pointer; color: var(--tb-gray-600); }
+  .x svg { width: 12px; height: 12px; }
+  .sample { display: inline-block; margin-top: 8px; font-family: var(--font-body); font-size: 9.5px; letter-spacing: 0.02em; color: var(--tb-gray-600); background: var(--tb-cream-50); border-radius: 3px; padding: 2px 6px; }
+  .sheet-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 10px; margin-top: 10px; font-size: 11px; }
+  .sheet-meta dt { color: var(--tb-gray-400); font-size: 10px; }
+  .sheet-meta dd { font-family: var(--font-body); font-size: 10.5px; }
+  .sheet-body { overflow-y: auto; padding: 4px 18px 0; flex: 1; scrollbar-width: none; }
+  .grp { font-size: 10px; font-weight: 600; color: var(--tb-gray-400); letter-spacing: 0.06em; text-transform: uppercase; margin: 14px 0 2px; }
+  .res { padding: 11px 0; border-bottom: 1px solid var(--tb-gray-100); }
+  .res-top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+  .res-name { font-size: 13px; }
+  .res-name small { color: var(--tb-gray-400); font-size: 11px; }
+  .res-val { font-family: var(--font-body); font-size: 13px; font-weight: 500; white-space: nowrap; }
+  .res-val.nd { color: var(--tb-gray-600); }
+  .res-sub { display: flex; justify-content: space-between; margin-top: 3px; font-family: var(--font-body); font-size: 9.5px; color: var(--tb-gray-400); }
+  .bar { position: relative; height: 4px; background: var(--tb-gray-100); border-radius: 4px; margin-top: 7px; }
+  .bar i { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: var(--tb-forest-700); border-radius: 4px; transition: width 0.8s var(--ease-reveal) 0.35s; }
+  .screen.is-open .bar i { width: var(--w); }
+  .bar::after { content: ""; position: absolute; right: 0; top: -3px; bottom: -3px; width: 1.5px; background: var(--tb-gray-400); }
+  .sheet-foot { padding: 12px 18px 22px; border-top: 1px solid var(--tb-gray-200); flex: none; }
+  .coa {
+    width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px;
+    border: 1px solid var(--tb-gray-900); border-radius: 6px; padding: 10px; background: #fff;
+    font: 600 12.5px/1 var(--font-display); color: var(--tb-gray-900); text-decoration: none;
+  }
+  .coa svg { width: 14px; height: 14px; }
+  .sheet-foot p { margin-top: 8px; font-size: 9.5px; color: var(--tb-gray-400); text-align: center; line-height: 1.4; }
+
+  .caption {
+    position: absolute; z-index: 3; left: 50%; bottom: var(--space-6); transform: translateX(-50%);
+    font-family: var(--font-body); font-size: var(--text-xs); color: var(--color-text-muted);
+    white-space: nowrap; opacity: 0; pointer-events: none;
+  }
+
+  /* ---------- How it works: report → draft → review ---------- */
+  .hiw { background: var(--color-bg-subtle); }
+  .hiw-track { position: relative; height: 340vh; }
+  .hiw-stage {
+    position: sticky; top: 0; height: 100vh; height: 100svh; overflow: clip;
+    max-width: 1440px; margin: 0 auto; padding: 96px var(--gutter) 48px;
+    display: grid; grid-template-columns: minmax(260px, 340px) 1fr; gap: clamp(32px, 4vw, 72px); align-items: center;
+  }
+  .eyebrow { font-family: var(--font-body); font-size: var(--text-xs); letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-text-muted); }
+  .hiw-stage > * { min-width: 0; }
+  .hiw-head h2 {
+    margin-top: var(--space-4); font-family: var(--font-display); font-weight: 500;
+    font-size: var(--text-h2); line-height: 1.08; letter-spacing: var(--tracking-display);
+  }
+  .steps { list-style: none; padding: 0 0 0 20px; margin-top: var(--space-10); position: relative; display: grid; gap: var(--space-6); }
+  .steps::before, .steps::after { content: ""; position: absolute; left: 0; top: 4px; bottom: 4px; width: 1.5px; background: var(--color-border-strong); }
+  .steps::after { background: var(--tb-forest-800); transform-origin: top; transform: scaleY(var(--rail, 0)); }
+  .step { opacity: 0.38; transition: opacity 0.4s var(--ease-reveal); }
+  .step.is-active { opacity: 1; }
+  .step-top { display: flex; gap: var(--space-3); align-items: baseline; }
+  .step-num { font-family: var(--font-body); font-size: var(--text-xs); color: var(--color-text-muted); }
+  .step-title { font-family: var(--font-display); font-weight: 600; font-size: 1.25rem; letter-spacing: -0.02em; }
+  .step-desc { margin-top: var(--space-2); font-size: 0.9375rem; line-height: 1.5; color: var(--color-text-secondary); max-width: 30ch; }
+  .step-now { display: none; }
+
+  .desk { position: relative; display: flex; gap: clamp(28px, 3.5vw, 56px); align-items: center; justify-content: center; }
+  .coa-wrap { position: relative; flex: none; }
+  .drop {
+    position: absolute; inset: -16px; border: 1.5px dashed var(--color-border-strong); border-radius: 14px;
+    display: grid; place-items: center; color: var(--color-text-muted); font-size: var(--text-sm);
+  }
+  .drop span { display: flex; flex-direction: column; align-items: center; gap: var(--space-2); }
+  .drop svg { width: 22px; height: 22px; }
+  .file {
+    position: absolute; left: 50%; bottom: -60px; transform: translateX(-50%); width: 240px;
+    background: #fff; border: 1px solid var(--color-border); border-radius: 8px; padding: 8px 10px;
+    font-family: var(--font-body); font-size: 11px; color: var(--color-text);
+  }
+  .file div { display: flex; justify-content: space-between; color: var(--color-text-muted); }
+  .file div b { color: var(--color-text); font-weight: 500; }
+  .file .bar { margin-top: 6px; }
+  .file .bar::after { display: none; }
+
+  .coa-doc {
+    position: relative; width: 360px; background: #fff; border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-md); padding: 24px 24px 20px; font-size: 11px; color: var(--tb-gray-900);
+    will-change: transform, opacity;
+  }
+  .coa-hd { display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 12px; border-bottom: 1.5px solid var(--tb-gray-900); }
+  .coa-lab { display: flex; gap: 8px; align-items: center; font-weight: 600; font-size: 12px; }
+  .coa-lab i { width: 18px; height: 18px; border-radius: 3px; background: #CFCFCB; }
+  .coa-ttl { text-align: right; font-family: var(--font-display); font-weight: 600; font-size: 13px; letter-spacing: -0.01em; }
+  .coa-ttl small { display: block; font-family: var(--font-body); font-weight: 400; font-size: 9px; color: var(--tb-gray-400); margin-top: 2px; }
+  .coa-meta { display: grid; grid-template-columns: 74px 1fr; gap: 3px 8px; padding: 12px 0; }
+  .coa-meta dt { color: var(--tb-gray-400); }
+  .coa-meta dd { font-family: var(--font-body); font-size: 10.5px; }
+  .src { border-radius: 2px; box-shadow: 0 0 0 3px transparent; transition: background 0.3s var(--ease-ui), box-shadow 0.3s var(--ease-ui); }
+  .src.is-read { background: rgb(0 245 0 / 0.16); box-shadow: 0 0 0 3px rgb(0 245 0 / 0.16); }
+  .src.is-focus { background: rgb(0 245 0 / 0.22); box-shadow: 0 0 0 3px rgb(0 245 0 / 0.22), 0 0 0 4.5px var(--tb-forest-800); }
+  .coa-tbl { width: 100%; border-collapse: collapse; font-size: 10.5px; }
+  .coa-tbl th { text-align: left; font-weight: 600; font-size: 9.5px; color: var(--tb-gray-600); padding: 6px 4px; border-top: 1px solid var(--tb-gray-200); border-bottom: 1px solid var(--tb-gray-200); }
+  .coa-tbl td { padding: 7px 4px; border-bottom: 1px solid var(--tb-gray-100); }
+  .coa-tbl td:not(:first-child) { font-family: var(--font-body); font-size: 10px; }
+  .coa-tbl tr.src td { border-bottom-color: transparent; }
+  .coa-ft { margin-top: 12px; display: flex; justify-content: space-between; align-items: flex-end; font-size: 9px; color: var(--tb-gray-400); }
+  .coa-ft .sig { width: 90px; border-top: 1px solid var(--tb-gray-400); padding-top: 3px; text-align: center; }
+  .scan { position: absolute; left: 0; right: 0; top: 0; height: 2px; background: var(--tb-lime-500); box-shadow: 0 0 12px 2px rgb(0 245 0 / 0.45); opacity: 0; pointer-events: none; }
+
+  .draft {
+    width: 400px; flex: none; background: #fff; border: 1px solid var(--color-border); border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md); font-size: 13px; color: var(--tb-gray-900); will-change: opacity;
+  }
+  .draft-hd { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; border-bottom: 1px solid var(--tb-gray-200); }
+  .draft-hd b { font-family: var(--font-display); font-weight: 600; font-size: 15px; letter-spacing: -0.01em; }
+  .draft-hd small { display: block; font-family: var(--font-body); font-size: 10px; color: var(--tb-gray-400); margin-top: 2px; }
+  .pill { font-size: 11px; font-weight: 500; padding: 3px 8px; border-radius: 999px; background: var(--tb-gray-100); color: var(--tb-gray-600); white-space: nowrap; transition: background 0.3s var(--ease-ui), color 0.3s var(--ease-ui); }
+  .pill.is-review { background: var(--tb-sand-200); color: #5B4A1F; }
+  .pill.is-done { background: var(--tb-forest-800); color: #fff; }
+  .draft-meta { display: grid; grid-template-columns: 1.5fr 0.8fr 1fr; gap: 10px; padding: 12px 16px; border-bottom: 1px solid var(--tb-gray-200); }
+  .draft-meta dt { font-size: 10.5px; color: var(--tb-gray-400); }
+  .draft-meta dd { margin-top: 3px; font-family: var(--font-body); font-size: 11.5px; display: flex; align-items: center; gap: 4px; min-height: 16px; }
+  .dst .sk { display: inline-block; height: 8px; width: 70%; border-radius: 4px; background: var(--tb-gray-100); }
+  .dst .v { display: none; }
+  .dst.is-filled .sk { display: none; }
+  .dst.is-filled .v { display: inline; animation: settle 0.45s var(--ease-reveal); }
+  @keyframes settle { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: none; } }
+  .tick { width: 13px; height: 13px; color: var(--tb-forest-700); opacity: 0; transform: scale(0.6); transition: opacity 0.3s var(--ease-reveal), transform 0.3s var(--ease-reveal); }
+  .is-checked .tick { opacity: 1; transform: none; }
+  .dhead, .drow { display: grid; grid-template-columns: 1fr 1.05fr 0.5fr 1.35fr; gap: 8px; align-items: center; padding: 0 16px; }
+  .dhead { padding-top: 10px; padding-bottom: 6px; font-size: 10.5px; color: var(--tb-gray-400); }
+  .drow { min-height: 42px; border-top: 1px solid var(--tb-gray-100); transition: background 0.3s var(--ease-ui); }
+  .drow.is-focus { background: var(--tb-gray-50); box-shadow: inset 2px 0 0 var(--tb-forest-800); }
+  .drow .an { font-weight: 500; }
+  .drow .rv, .drow .un { font-family: var(--font-body); font-size: 12px; }
+  .drow .un { color: var(--tb-gray-600); }
+  .qual { font-family: var(--font-body); font-size: 9.5px; color: var(--tb-gray-600); border: 1px solid var(--tb-gray-200); border-radius: 3px; padding: 0 4px; margin-left: 4px; }
+  .st { font-size: 11px; color: var(--tb-gray-400); display: flex; align-items: center; gap: 5px; white-space: nowrap; }
+  .st .flag { display: none; background: var(--tb-sand-200); color: #5B4A1F; border-radius: 4px; padding: 2px 6px; font-weight: 500; }
+  .st .ok { display: none; align-items: center; gap: 4px; color: var(--tb-forest-700); font-weight: 500; }
+  .st .ok svg { width: 13px; height: 13px; }
+  .drow.is-filled .st .dash { display: none; }
+  .drow.is-filled:not(.is-checked) .st .wait { display: inline; }
+  .st .wait { display: none; }
+  .drow.is-flagged:not(.is-checked) .st .wait { display: none; }
+  .drow.is-flagged:not(.is-checked) .st .flag { display: inline; }
+  .drow.is-checked .st .ok { display: inline-flex; animation: settle 0.45s var(--ease-reveal); }
+  .draft-ft { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 16px; border-top: 1px solid var(--tb-gray-200); }
+  .draft-ft .count { font-size: 11.5px; color: var(--tb-gray-600); font-family: var(--font-body); }
+  .approve {
+    border: 0; border-radius: 6px; padding: 9px 12px; font: 600 12.5px/1 var(--font-display); letter-spacing: -0.01em;
+    background: var(--tb-gray-100); color: var(--tb-gray-400); transition: background 0.3s var(--ease-ui), color 0.3s var(--ease-ui);
+  }
+  .approve.is-ready { background: var(--tb-forest-800); color: #fff; }
+  .approve.is-done { background: var(--tb-lime-500); color: var(--tb-forest-800); }
+
+  .chips { position: absolute; inset: 0; pointer-events: none; z-index: 3; overflow: visible; }
+  .chip {
+    position: absolute; left: 0; top: 0; white-space: nowrap; opacity: 0;
+    font-family: var(--font-body); font-size: 11px; padding: 4px 8px; border-radius: 4px;
+    background: var(--tb-forest-800); color: #fff; box-shadow: 0 6px 16px -6px rgb(10 33 32 / 0.4);
+    will-change: transform, opacity;
+  }
+  .link-line { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 2; overflow: visible; }
+  .link-line path { fill: none; stroke: var(--tb-forest-800); stroke-width: 1.5; stroke-dasharray: 3 4; }
+  .link-line circle { fill: var(--tb-forest-800); }
+
+  @media (min-width: 1320px) and (min-height: 820px) {
+    .desk { transform: scale(1.14); transform-origin: 40% 50%; }
+  }
+  @media (max-width: 1100px) {
+    .coa-doc { width: 310px; padding: 18px; }
+    .draft { width: 350px; }
+  }
+  @media (max-width: 900px) {
+    .hiw-stage { grid-template-columns: 1fr; grid-template-rows: auto 1fr; align-items: start; gap: 14px; padding: 76px 16px 16px; }
+    .hiw-head h2 { font-size: 1.5rem; margin-top: var(--space-2); }
+    .steps { grid-template-columns: repeat(3, auto); justify-content: start; gap: var(--space-5); padding: 0; margin-top: var(--space-4); }
+    .steps::before, .steps::after, .step-desc { display: none; }
+    .step-title { font-size: 0.9375rem; }
+    .step-now { display: block; margin-top: var(--space-2); font-size: var(--text-sm); line-height: 1.45; color: var(--color-text-secondary); min-height: 2.9em; }
+    .desk { flex-direction: column; justify-content: flex-start; gap: 12px; }
+    .drop { inset: -8px; }
+    .file { bottom: auto; top: 40%; }
+    .coa-doc { width: min(100%, 330px); padding: 12px 14px; font-size: 9.5px; }
+    .coa-meta { grid-template-columns: 60px 1fr; padding: 8px 0; gap: 1px 6px; }
+    .coa-meta .opt, .coa-ft { display: none; }
+    .coa-hd { gap: 8px; padding-bottom: 8px; }
+    .coa-lab { font-size: 10px; }
+    .coa-ttl { font-size: 11px; }
+    .coa-tbl td { padding: 4px; }
+    .coa-tbl th { padding: 4px; }
+    .draft { width: min(100%, 360px); font-size: 12px; }
+    .draft-hd { padding: 10px 12px; }
+    .draft-meta { padding: 8px 12px; }
+    .dhead, .drow { padding: 0 12px; }
+    .dhead { display: none; }
+    .drow { min-height: 34px; }
+    .draft-ft { padding: 8px 12px; }
+    .link-line { display: none; }
+  }
+
+  /* ---------- Where results appear: headline + card rail ---------- */
+  .show { background: var(--color-bg); --card-warm: #F9F6EE; }
+  #show-track { position: relative; height: 440vh; }
+  .show-stage { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: clip; }
+  .show-head {
+    position: absolute; left: 0; right: 0; top: 17vh; padding: 0 var(--gutter); text-align: center;
+    will-change: opacity, transform; transform-origin: 50% 0;
+  }
+  .show-head h2 {
+    margin: var(--space-5) auto 0; max-width: 24ch; text-wrap: balance;
+    font-family: var(--font-display); font-weight: 500; font-size: clamp(2.75rem, 6.2vw, 6.5rem);
+    line-height: 1.01; letter-spacing: -0.035em;
+  }
+  .show-head h2 span { color: var(--tb-forest-800); }
+  .show-row { position: absolute; left: var(--gutter); top: 0; display: flex; gap: var(--grid-gap); will-change: transform; }
+
+  .scard {
+    position: relative; flex: none; width: var(--cw, 640px); height: var(--ch, 560px);
+    background: var(--card-warm); border: 1px solid rgb(231 217 185 / 0.55); border-radius: var(--radius-lg); overflow: hidden;
+    color: var(--color-text); text-decoration: none; isolation: isolate;
+    transition: transform 0.45s var(--ease-reveal), box-shadow 0.45s var(--ease-reveal), background 0.3s var(--ease-ui);
+  }
+  .scard:focus-visible { outline: 2px solid var(--color-focus-ring); outline-offset: 3px; }
+  .scard-copy { padding: 28px 28px 0; max-width: 40ch; }
+  .scard-num { position: absolute; right: 24px; top: 26px; font-size: var(--text-sm); color: var(--tb-forest-700); font-variant-numeric: tabular-nums; }
+  .scard h3 { font-family: var(--font-display); font-weight: 600; font-size: 1.375rem; letter-spacing: -0.02em; line-height: 1.15; }
+  .scard p { margin-top: 6px; font-size: 0.9375rem; line-height: 1.45; color: var(--color-text-secondary); }
+  .scard .more { margin-top: 14px; display: inline-flex; align-items: center; gap: 6px; font-size: var(--text-sm); font-weight: 500; color: var(--color-link); }
+  .scard .more svg { width: 14px; height: 14px; transition: transform 0.3s var(--ease-reveal); }
+  .scard:hover .more svg { transform: translateX(4px); }
+
+  /* Merchant store mock: someone else's brand, with the TrueBatch part inside it */
+  .mock { position: absolute; left: 28px; right: 0; top: 168px; bottom: 0; border-radius: 10px 0 0 0; overflow: hidden; box-shadow: -1px -1px 0 rgb(10 33 32 / 0.06), 0 -10px 30px -18px rgb(10 33 32 / 0.25); }
+  .mock-in {
+    width: 720px; height: 460px; transform-origin: 0 0; transform: scale(calc(var(--ms, 1) * var(--hz, 1)));
+    transition: transform 0.6s var(--ease-reveal);
+    --m-bg: var(--tb-white); --m-ink: var(--tb-gray-900); --m-line: var(--tb-gray-200);
+    background: var(--m-bg); color: var(--m-ink); font-size: 12px;
+  }
+  .scard:hover .mock-in { --hz: 1.025; }
+  .m-ann { height: 22px; background: var(--tb-gray-900); color: var(--tb-gray-100); font-size: 10px; display: grid; place-items: center; letter-spacing: 0.02em; }
+  .m-nav { height: 44px; display: flex; align-items: center; gap: 22px; padding: 0 22px; border-bottom: 1px solid var(--m-line); font-size: 11.5px; }
+  .m-logo { font-family: var(--font-display); font-weight: 600; font-size: 17px; letter-spacing: -0.03em; color: var(--m-ink); margin-right: 10px; }
+  .m-logo i { font-style: normal; color: var(--tb-gray-400); margin-right: 3px; }
+  .m-nav .bag { margin-left: auto; width: 16px; height: 16px; }
+  .m-body { display: grid; grid-template-columns: 250px 1fr; gap: 26px; padding: 22px; }
+  .m-eyebrow { font-size: 9.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--tb-gray-400); }
+  .m-h { margin-top: 4px; font-family: var(--font-display); font-weight: 600; font-size: 25px; line-height: 1.05; letter-spacing: -0.03em; color: var(--m-ink); }
+  .m-p { margin-top: 8px; font-size: 11px; line-height: 1.5; color: var(--tb-gray-600); max-width: 34ch; }
+  .m-price { margin-top: 8px; font-weight: 600; font-size: 14px; }
+  .m-cta { margin-top: 12px; height: 34px; border-radius: 4px; background: var(--tb-gray-900); color: #fff; display: grid; place-items: center; font-weight: 600; font-size: 11.5px; }
+  .pouch { position: relative; height: 300px; background: var(--tb-sand-200); border-radius: 6px; display: grid; place-items: center; }
+  .pouch-bag { position: relative; width: 150px; height: 210px; background: var(--tb-cream-50); border-radius: 10px 10px 16px 16px; box-shadow: 0 18px 30px -18px rgb(10 33 32 / 0.4), inset 0 10px 0 #EAE3CF; padding: 30px 16px 16px; display: flex; flex-direction: column; gap: 4px; }
+  .pouch-bag b { font-family: var(--font-display); font-weight: 600; font-size: 19px; line-height: 0.98; letter-spacing: -0.03em; color: var(--m-ink); }
+  .pouch-bag small { font-size: 9px; color: var(--tb-gray-600); }
+  .pouch-bag .qr { margin-top: auto; width: 62px; height: 62px; padding: 4px; }
+
+  .tb-spot { position: relative; border-radius: 8px; transition: box-shadow 0.35s var(--ease-reveal); }
+  .tb-spot::after {
+    content: "TrueBatch"; position: absolute; right: 8px; top: -9px; padding: 2px 7px; border-radius: 4px;
+    background: var(--tb-lime-500); color: var(--tb-forest-800); font: 600 9.5px/1.3 var(--font-display);
+    opacity: 0; transform: translateY(4px); transition: opacity 0.3s var(--ease-ui), transform 0.35s var(--ease-reveal);
+  }
+  .scard:hover .tb-spot, .scard:focus-visible .tb-spot { box-shadow: 0 0 0 2px var(--tb-lime-500), 0 0 0 6px rgb(0 245 0 / 0.18); }
+  .scard:hover .tb-spot::after, .scard:focus-visible .tb-spot::after { opacity: 1; transform: none; }
+  .tb-w { margin-top: 14px; background: #fff; border: 1px solid var(--m-line); padding: 12px; color: var(--tb-gray-900); }
+  .tb-w .top { display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--tb-gray-600); }
+  .tb-w .lot { font-size: 10px; padding: 2px 6px; }
+  .tb-w .rr { font-size: 11.5px; padding: 7px 0; }
+  .tb-w .tbw-btn { margin-top: 8px; padding: 9px 10px; font-size: 11.5px; cursor: inherit; }
+  .tb-w .tb-badge { width: 15px; height: 15px; font-size: 9.5px; }
+  .rr { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 9px 0; border-top: 1px solid var(--tb-gray-100); }
+  .rr b { font-weight: 500; }
+  .rr .u { color: var(--tb-gray-600); }
+  .lots { margin-top: 14px; background: #fff; border: 1px solid var(--m-line); color: var(--tb-gray-900); }
+  .lots .hd, .lots .ln2 { display: grid; grid-template-columns: 1fr 1fr 110px; align-items: center; padding: 0 12px; }
+  .lots .hd { height: 30px; font-size: 10px; color: var(--tb-gray-400); border-bottom: 1px solid var(--tb-gray-100); }
+  .lots .ln2 { height: 40px; font-size: 11.5px; border-bottom: 1px solid var(--tb-gray-100); }
+  .lots .ln2 b { font-weight: 600; }
+  .lots .go { justify-self: end; font-size: 10.5px; font-weight: 600; padding: 6px 9px; border-radius: 4px; border: 1px solid var(--tb-gray-200); }
+  .lots .ln2:first-of-type .go { background: var(--tb-forest-800); border-color: var(--tb-forest-800); color: #fff; }
+  .qr { background: #fff; border-radius: 4px; }
+  .qr svg { width: 100%; height: 100%; display: block; }
+  .m-phone { width: 190px; justify-self: center; background: #fff; border: 7px solid #1B1D1C; border-radius: 26px; padding: 18px 14px 14px; color: var(--tb-gray-900); box-shadow: 0 20px 30px -20px rgb(10 33 32 / 0.5); }
+  .m-phone h4 { font-family: var(--font-display); font-weight: 600; font-size: 13px; letter-spacing: -0.02em; }
+  .m-phone .m { margin-top: 2px; font-size: 9.5px; color: var(--tb-gray-600); }
+  .m-phone .rr { font-size: 10.5px; padding: 6px 0; }
+  .m-phone .btn-sm { margin-top: 8px; text-align: center; border: 1px solid var(--tb-gray-900); border-radius: 4px; padding: 6px; font: 600 10px/1 var(--font-display); }
+  .m-field { margin-top: 14px; display: flex; gap: 8px; }
+  .m-field .f { flex: 1; height: 36px; background: #fff; border: 1.5px solid var(--m-ink); border-radius: 4px; display: flex; align-items: center; padding: 0 10px; font-size: 13px; font-weight: 500; }
+  .m-field .f i { width: 1.5px; height: 16px; background: var(--m-ink); margin-left: 1px; animation: blink 1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  .m-field .b { height: 36px; padding: 0 14px; border-radius: 4px; background: var(--m-ink); color: #fff; display: grid; place-items: center; font-weight: 600; font-size: 11px; }
+
+  .show-ui {
+    position: absolute; left: var(--gutter); right: var(--gutter); bottom: 22px; display: flex; align-items: center; gap: var(--space-5);
+    font-size: var(--text-sm); color: var(--color-text-muted); font-variant-numeric: tabular-nums; opacity: 0;
+  }
+  .show-ui b { color: var(--color-text); font-weight: 500; }
+  .show-ui .track { flex: 1; max-width: 240px; height: 2px; background: var(--color-border); border-radius: 2px; overflow: hidden; }
+  .show-ui .track i { display: block; height: 100%; width: 100%; background: var(--tb-forest-800); transform-origin: left; transform: scaleX(0); }
+  .show-ui .name { color: var(--color-text-secondary); }
+
+  @media (max-width: 700px) {
+    .show-head h2 br { display: none; }
+    .scard-copy { padding: 20px 20px 0; }
+    .scard h3 { font-size: 1.125rem; }
+    .scard p { font-size: var(--text-sm); }
+    .mock { left: 20px; top: 150px; }
+  }
+
+    /* ---------- Recurring testing: one product, a report for every batch ---------- */
+  .lots-sec {
+    --ink: var(--tb-cream-50); --ink-2: #B9C2BC; --ink-3: #7F8C86; --line: #1E3A37; --panel: #0F2B29;
+    background: var(--tb-forest-950); color: var(--ink);
+  }
+  .lots-sec .eyebrow { color: var(--ink-3); }
+  #lots-track { position: relative; height: 460vh; }
+  .lots-stage {
+    position: sticky; top: 0; height: 100vh; height: 100svh; overflow: clip;
+    max-width: 1440px; margin: 0 auto; padding: 96px var(--gutter) 40px;
+    display: grid; grid-template-columns: minmax(300px, 420px) 1fr; gap: clamp(32px, 4vw, 72px); align-items: center;
+  }
+  .lots-stage > * { min-width: 0; }
+  .lots-copy h2 {
+    margin-top: var(--space-4); font-family: var(--font-display); font-weight: 500;
+    font-size: var(--text-h2); line-height: 1.06; letter-spacing: var(--tracking-display);
+  }
+  .lots-copy h2 span { color: var(--tb-lime-500); }
+  .lots-copy > p { margin-top: var(--space-5); font-size: var(--text-base); line-height: var(--leading-normal); color: var(--ink-2); max-width: 36ch; }
+
+  .lot-now { margin-top: var(--space-10); padding-top: var(--space-5); border-top: 1px solid var(--line); }
+  .lot-now .lbl { font-size: var(--text-xs); color: var(--ink-3); }
+  .lot-now .code { display: block; margin-top: 6px; font-family: var(--font-display); font-weight: 500; font-size: 3rem; line-height: 1; letter-spacing: -0.035em; }
+  .lot-now .meta { display: block; margin-top: 8px; font-size: var(--text-sm); color: var(--ink-2); }
+  .lchip { display: inline-block; margin-top: 12px; font-size: 12px; font-weight: 500; padding: 4px 10px; border-radius: 999px; border: 1px solid #2C4A46; color: var(--ink-2); transition: background 0.3s var(--ease-ui), color 0.3s var(--ease-ui), border-color 0.3s var(--ease-ui); }
+  .lchip.is-new { border-color: var(--tb-lime-500); color: var(--tb-lime-500); }
+  .lchip.is-review { background: var(--tb-sand-200); border-color: var(--tb-sand-200); color: #5B4A1F; }
+  .lot-ticks { display: flex; gap: 6px; margin-top: var(--space-6); }
+  .lot-ticks i { width: 22px; height: 3px; border-radius: 3px; background: var(--line); transition: background 0.3s var(--ease-ui); }
+  .lot-ticks i.on { background: var(--ink-3); }
+  .lot-ticks i.on:last-child { background: var(--tb-lime-500); }
+
+  .lots-scene-wrap { position: relative; justify-self: center; }
+  .lots-scene { position: absolute; left: 0; top: 0; width: 600px; height: 560px; transform-origin: 0 0; }
+  .glow { position: absolute; left: 50%; top: 52%; width: 520px; height: 520px; margin: -260px 0 0 -260px; border-radius: 50%; background: radial-gradient(closest-side, rgb(231 217 185 / 0.14), transparent 70%); }
+
+  /* lab reports, filed behind the jar */
+  .hp {
+    position: absolute; left: 50%; top: 44%; width: 220px; height: 284px; margin: -142px 0 0 -110px;
+    background: #FAFAF7; border-radius: 3px; padding: 18px; box-shadow: 0 18px 36px -18px rgb(0 0 0 / 0.55);
+    display: flex; flex-direction: column; gap: 7px; will-change: transform, opacity; color: var(--tb-gray-900);
+  }
+  .hp .tab {
+    position: absolute; top: -20px; height: 21px; padding: 0 9px; border-radius: 5px 5px 0 0; background: #E7E5DC;
+    display: flex; align-items: center; font-size: 10.5px; font-weight: 600; color: var(--tb-gray-900);
+  }
+  .hp.new .tab { background: var(--tb-lime-500); color: var(--tb-forest-800); }
+  .hp.new { box-shadow: 0 0 0 2px var(--tb-lime-500), 0 18px 36px -18px rgb(0 0 0 / 0.55); }
+  .hp .h { display: flex; gap: 8px; align-items: center; }
+  .hp .h i { width: 16px; height: 16px; border-radius: 3px; background: #D6D6D1; flex: none; }
+  .hp .t { font-family: var(--font-display); font-weight: 600; font-size: 11px; letter-spacing: -0.01em; }
+  .hp .m { font-size: 9.5px; color: var(--tb-gray-600); }
+  .hp .rule { height: 1px; background: #E2E2DD; margin: 2px 0; }
+  .hp .row { display: flex; justify-content: space-between; font-size: 9.5px; color: var(--tb-gray-600); }
+  .hp .row b { font-weight: 500; color: var(--tb-gray-900); }
+  .hp .ln { height: 3px; border-radius: 2px; background: #E4E4DF; }
+
+  /* the product */
+  .hjar { position: absolute; left: 50%; bottom: 34px; width: 250px; height: 300px; margin-left: -125px; z-index: 20; }
+  .hjar .lid {
+    position: absolute; left: 14px; right: 14px; top: 0; height: 56px; border-radius: 12px 12px 4px 4px;
+    background: repeating-linear-gradient(90deg, #2A2A2A 0 5px, #1F1F1F 5px 8px); box-shadow: inset 0 -6px 0 rgb(0 0 0 / 0.25);
+  }
+  .hjar .body {
+    position: absolute; left: 0; right: 0; top: 48px; bottom: 0; border-radius: 28px; background: var(--tb-cream-50);
+    box-shadow: inset -18px 0 30px -10px rgb(10 33 32 / 0.14), inset 14px 0 24px -12px rgb(255 255 255 / 0.9), 0 30px 50px -24px rgb(0 0 0 / 0.6);
+  }
+  .hjar .label {
+    position: absolute; left: 0; right: 0; top: 46px; bottom: 34px; background: var(--tb-sand-200);
+    padding: 22px 26px; display: flex; flex-direction: column; color: var(--tb-gray-900);
+  }
+  .hjar .label small { font-size: 10px; color: #5B4A1F; letter-spacing: 0.02em; }
+  .hjar .label b { margin-top: 8px; font-family: var(--font-display); font-weight: 600; font-size: 30px; line-height: 0.95; letter-spacing: -0.04em; }
+  .hjar .label span { margin-top: 6px; font-size: 11px; color: #5B4A1F; }
+  .hjar .lotline { margin-top: auto; align-self: flex-start; display: flex; gap: 6px; align-items: center; font-size: 10.5px; font-weight: 600; background: var(--tb-cream-50); border-radius: 3px; padding: 4px 7px; overflow: hidden; }
+  .hjar .lotline em { font-style: normal; display: inline-block; min-width: 40px; transition: transform 0.4s var(--ease-reveal), opacity 0.3s var(--ease-ui); }
+  .hjar .lotline em.flip { transform: translateY(-110%); opacity: 0; transition: none; }
+  .floor { position: absolute; left: 50%; bottom: 20px; width: 300px; height: 30px; margin-left: -150px; border-radius: 50%; background: radial-gradient(closest-side, rgb(0 0 0 / 0.45), transparent); z-index: 19; }
+
+  .lots-pts { max-width: var(--container-max); margin: 0 auto; padding: var(--space-12) var(--gutter) var(--section-y); display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--grid-gap); }
+  .pt { border-top: 1px solid var(--line); padding-top: var(--space-5); }
+  .pt h3 { font-family: var(--font-display); font-weight: 600; font-size: 1.25rem; letter-spacing: -0.02em; }
+  .pt p { margin-top: var(--space-2); font-size: 0.9375rem; line-height: 1.55; color: var(--ink-2); max-width: 36ch; }
+
+  @media (max-width: 900px) {
+    .lots-stage { grid-template-columns: 1fr; grid-template-rows: auto 1fr; align-items: start; gap: 8px; padding: 76px 16px 16px; }
+    .lots-copy h2 { font-size: 1.625rem; margin-top: var(--space-2); }
+    .lots-copy > p { display: none; }
+    .lot-now { margin-top: var(--space-4); padding-top: var(--space-3); display: grid; grid-template-columns: auto 1fr; column-gap: 14px; align-items: center; }
+    .lot-now .lbl { grid-column: 1 / -1; }
+    .lot-now .code { font-size: 2rem; grid-row: 2 / 4; }
+    .lot-now .meta { margin-top: 0; }
+    .lchip { margin-top: 4px; justify-self: start; }
+    .lot-ticks { display: none; }
+    .lots-scene-wrap { align-self: center; }
+    .lots-pts { grid-template-columns: 1fr; gap: var(--space-6); padding-top: var(--space-8); }
+  }
+
+  .nav.on-dark .nav-pill { border-color: rgb(255 255 255 / 0.18); box-shadow: 0 10px 30px -14px rgb(0 0 0 / 0.6); }
+  .nav.on-dark.is-joined .nav-cta { border-color: transparent; box-shadow: none; }
+
+    /* ---------- Who it's for: categories + roles ---------- */
+  .who { background: var(--color-bg); padding: var(--section-y) var(--gutter); --card-warm: #F9F6EE; }
+  .who-in { max-width: var(--container-max); margin: 0 auto; }
+  .who-top { display: grid; grid-template-columns: 1.2fr 1fr; gap: var(--space-12); align-items: end; }
+  .who-top h2 { margin-top: var(--space-4); font-family: var(--font-display); font-weight: 500; font-size: var(--text-h1); line-height: 1.04; letter-spacing: var(--tracking-display); max-width: 15ch; }
+  .who-top h2 span { color: var(--tb-forest-800); }
+  .who-top p { font-size: var(--text-lg); line-height: var(--leading-normal); color: var(--color-text-secondary); max-width: 40ch; }
+
+  .cats { margin-top: var(--space-16); display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--grid-gap); }
+  .cat {
+    background: var(--card-warm); border: 1px solid rgb(231 217 185 / 0.55); border-radius: var(--radius-lg); overflow: hidden;
+    display: flex; flex-direction: column; opacity: 0;
+  }
+  /* reveal uses `translate` so it never fights the hover lift on `transform` */
+  .cat.is-in { opacity: 1; animation: cat-in 0.7s var(--ease-reveal) both; animation-delay: calc(var(--i) * 90ms); }
+  @keyframes cat-in { from { opacity: 0; translate: 0 24px; } to { opacity: 1; translate: 0 0; } }
+  .cat:hover { box-shadow: 0 24px 48px -28px rgb(10 33 32 / 0.35); }
+  .cat-stage { position: relative; height: 240px; display: grid; place-items: end center; padding-bottom: 26px; background: radial-gradient(120% 90% at 50% 100%, var(--tb-sand-200), transparent 70%); }
+  .cat-stage::after { content: ""; position: absolute; left: 50%; bottom: 18px; width: 120px; height: 14px; margin-left: -60px; border-radius: 50%; background: radial-gradient(closest-side, rgb(10 33 32 / 0.22), transparent); }
+  .prod { position: relative; z-index: 1; transition: transform 0.6s var(--ease-reveal); }
+  .cat:hover .prod { transform: translateY(-8px) rotate(-2deg); }
+  .cat-lot { position: absolute; top: 14px; right: 14px; font-size: 11px; font-weight: 500; color: var(--tb-gray-600); background: rgb(255 255 255 / 0.7); border: 1px solid var(--tb-gray-200); border-radius: 4px; padding: 2px 6px; }
+  .cat-body { padding: 18px 20px 22px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
+  .cat h3 { font-family: var(--font-display); font-weight: 600; font-size: 1.1875rem; letter-spacing: -0.02em; line-height: 1.2; }
+  .cat .ex { font-size: var(--text-sm); color: var(--color-text-secondary); }
+  .panels { margin-top: auto; padding-top: 12px; display: flex; flex-wrap: wrap; gap: 6px; }
+  .panels span { font-size: 11px; font-weight: 500; padding: 3px 8px; border-radius: 999px; border: 1px solid var(--tb-gray-200); color: var(--tb-gray-600); background: #fff; transition: border-color 0.3s var(--ease-ui), color 0.3s var(--ease-ui); }
+  .cat:hover .panels span { border-color: var(--tb-forest-700); color: var(--tb-forest-800); }
+
+  /* product objects */
+  .p-tub { width: 104px; height: 124px; }
+  .p-tub .lid { position: absolute; left: 6px; right: 6px; top: 0; height: 24px; border-radius: 6px 6px 2px 2px; background: repeating-linear-gradient(90deg, #2A2A2A 0 4px, #1F1F1F 4px 6px); }
+  .p-tub .bd { position: absolute; left: 0; right: 0; top: 20px; bottom: 0; border-radius: 14px; background: var(--tb-cream-50); box-shadow: inset -10px 0 16px -8px rgb(10 33 32 / 0.16); }
+  .p-tub .lb { position: absolute; left: 0; right: 0; top: 40px; bottom: 16px; background: var(--tb-sand-200); padding: 10px 12px; font: 600 13px/0.95 var(--font-display); letter-spacing: -0.03em; color: var(--tb-gray-900); }
+  .p-bottle { width: 78px; height: 150px; }
+  .p-bottle .cap { position: absolute; left: 18px; right: 18px; top: 0; height: 24px; border-radius: 4px; background: var(--tb-forest-950); }
+  .p-bottle .bd { position: absolute; left: 0; right: 0; top: 20px; bottom: 0; border-radius: 16px 16px 12px 12px; background: #fff; box-shadow: inset -10px 0 16px -8px rgb(10 33 32 / 0.14), 0 0 0 1px var(--tb-gray-200); }
+  .p-bottle .lb { position: absolute; left: 0; right: 0; top: 52px; height: 58px; background: var(--tb-cream-50); border-top: 2px solid var(--tb-forest-800); padding: 8px 10px; font: 600 11px/1 var(--font-display); letter-spacing: -0.02em; color: var(--tb-gray-900); }
+  .p-pouch { width: 96px; height: 150px; }
+  .p-pouch .sp { position: absolute; left: 50%; top: 0; width: 22px; height: 22px; margin-left: -11px; border-radius: 4px 4px 2px 2px; background: var(--tb-forest-700); }
+  .p-pouch .bd { position: absolute; left: 0; right: 0; top: 18px; bottom: 0; background: var(--tb-cream-50); clip-path: polygon(30% 0, 70% 0, 100% 22%, 100% 100%, 0 100%, 0 22%); border-radius: 0 0 14px 14px; }
+  .p-pouch .lb { position: absolute; left: 12px; right: 12px; top: 58px; font: 600 13px/0.95 var(--font-display); letter-spacing: -0.03em; color: var(--tb-gray-900); }
+  .p-pouch .lb small { display: block; margin-top: 6px; font: 500 9px/1 var(--font-body); letter-spacing: 0; color: var(--tb-gray-600); }
+  .p-pouch .fruit { position: absolute; left: 14px; bottom: 14px; width: 26px; height: 26px; border-radius: 50%; background: var(--tb-sand-200); }
+  .p-vit { width: 92px; height: 122px; }
+  .p-vit .cap { position: absolute; left: 8px; right: 8px; top: 0; height: 28px; border-radius: 6px; background: var(--tb-sand-200); box-shadow: inset 0 -4px 0 rgb(10 33 32 / 0.08); }
+  .p-vit .bd { position: absolute; left: 0; right: 0; top: 24px; bottom: 0; border-radius: 12px; background: var(--tb-forest-800); }
+  .p-vit .lb { position: absolute; left: 0; right: 0; top: 44px; height: 46px; background: var(--tb-cream-50); padding: 7px 10px; font: 600 11px/1 var(--font-display); letter-spacing: -0.02em; color: var(--tb-gray-900); }
+  .p-vit .lb small { display: block; margin-top: 4px; font: 500 8.5px/1 var(--font-body); letter-spacing: 0; color: var(--tb-gray-600); }
+  .tabl { position: absolute; bottom: -2px; width: 22px; height: 12px; border-radius: 6px; background: #fff; box-shadow: 0 0 0 1px var(--tb-gray-200); }
+
+  /* roles: sticky intro + pills on the left, one card per role scrolling on the right */
+  .roles { margin-top: var(--space-24); display: grid; grid-template-columns: minmax(280px, 0.8fr) 1.2fr; gap: clamp(40px, 6vw, 112px); align-items: start; }
+  .roles-head { position: sticky; top: 120px; }
+  .roles-head h3 { margin-top: var(--space-4); font-family: var(--font-display); font-weight: 500; font-size: clamp(2rem, 3.4vw, 3rem); line-height: 1.04; letter-spacing: var(--tracking-display); max-width: 12ch; }
+  .roles-head > p { margin-top: var(--space-5); font-size: var(--text-base); line-height: var(--leading-normal); color: var(--color-text-secondary); max-width: 34ch; }
+  .role-pills { margin-top: var(--space-8); display: flex; flex-wrap: wrap; gap: 8px; }
+  .role-pill {
+    display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 18px; border-radius: var(--r-pill);
+    border: 1px solid var(--hairline); background: #fff; color: var(--tb-gray-600); text-decoration: none; white-space: nowrap;
+    font-family: var(--font-display); font-weight: 600; font-size: 0.9375rem; letter-spacing: -0.01em;
+    transition: background 0.3s var(--ease-ui), color 0.3s var(--ease-ui), border-color 0.3s var(--ease-ui);
+  }
+  .role-pill i { font-style: normal; font-family: var(--font-body); font-weight: 500; font-size: 12px; color: var(--tb-gray-400); transition: color 0.3s var(--ease-ui); }
+  .role-pill:hover { border-color: rgb(10 33 32 / 0.2); color: var(--tb-gray-900); }
+  .role-pill.is-on { background: var(--tb-forest-950); border-color: var(--tb-forest-950); color: var(--tb-cream-50); }
+  .role-pill.is-on i { color: var(--tb-lime-500); }
+  .role-pill:focus-visible { outline: 2px solid var(--color-focus-ring); outline-offset: 2px; }
+
+  .rcards { display: grid; gap: var(--space-6); }
+  .rcard { scroll-margin-top: 110px; background: var(--card-warm); border: 1px solid var(--hairline); border-radius: var(--r-card); padding: 24px; }
+  .rnum { font-size: var(--text-xs); font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--tb-gray-400); }
+  .rcard h4 { margin-top: var(--space-3); font-family: var(--font-display); font-weight: 500; font-size: clamp(1.625rem, 2.4vw, 2.25rem); line-height: 1.08; letter-spacing: -0.03em; max-width: 20ch; }
+  .rcard h4 span { color: var(--tb-forest-800); }
+  .rpts { margin-top: var(--space-6); display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-5); list-style: none; padding: 0; }
+  .rpts li { border-top: 1px solid var(--hairline); padding-top: var(--space-4); }
+  .rpts b { display: block; font-family: var(--font-display); font-weight: 600; font-size: 0.9375rem; letter-spacing: -0.01em; }
+  .rpts span { display: block; margin-top: 4px; font-size: var(--text-sm); line-height: 1.5; color: var(--color-text-secondary); }
+  .rp-link { margin-top: var(--space-6); display: inline-flex; align-items: center; gap: 6px; font-size: var(--text-sm); font-weight: 500; color: var(--color-link); text-decoration: none; }
+  .rp-link svg { width: 14px; height: 14px; transition: transform 0.3s var(--ease-reveal); }
+  .rp-link:hover svg { transform: translateY(2px); }
+
+  /* each card's stage shows the role's moment with the same lot A2419 */
+  .rstage {
+    position: relative; margin-top: var(--space-6); height: 340px; border-radius: var(--r-inner); overflow: hidden;
+    background: radial-gradient(90% 80% at 70% 100%, rgb(231 217 185 / 0.55), transparent 70%), var(--tb-cream-50);
+    border: 1px solid var(--hairline);
+  }
+  .rv { transition: opacity 0.7s var(--ease-reveal), transform 0.8s var(--ease-reveal); }
+  .rcard:not(.is-in) .rv { opacity: 0; }
+
+  /* founders: the shopper's view beside the product */
+  .rs-prod { position: absolute; left: 12%; bottom: 40px; transform: scale(1.35); transform-origin: 50% 100%; }
+  .rs-widget {
+    position: absolute; right: 8%; top: 50%; width: min(320px, 56%); translate: 0 -50%; background: #fff; border: 1px solid var(--hairline);
+    border-radius: var(--r-inner); padding: 16px; box-shadow: var(--shadow-float);
+  }
+  .rcard:not(.is-in) .rs-widget { transform: translateY(18px); }
+  .rs-widget .top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .rs-widget .top b { font-family: var(--font-display); font-weight: 600; font-size: 14px; letter-spacing: -0.01em; }
+  .rs-widget .rr { font-size: 13px; }
+  .rs-widget .sample { margin-top: 8px; }
+  .rs-widget .coa { margin-top: 12px; height: 34px; font-size: 12px; }
+
+  /* qa: the source line and the extracted draft, side by side */
+  .rs-doc {
+    position: absolute; left: 7%; top: 34px; width: min(330px, 60%); background: #FDFDFB; border-radius: 3px; padding: 18px 20px;
+    box-shadow: 0 24px 40px -24px rgb(10 33 32 / 0.4), 0 1px 0 rgb(10 33 32 / 0.04); rotate: -2deg; color: var(--tb-gray-900);
+  }
+  .rcard:not(.is-in) .rs-doc { transform: rotate(-5deg) translateY(10px); }
+  .rs-doc .k { display: flex; gap: 8px; align-items: center; font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--tb-gray-400); }
+  .rs-doc .k em { font-style: normal; height: 20px; padding: 0 8px; border-radius: var(--r-pill); border: 1px solid var(--hairline); display: inline-flex; align-items: center; color: var(--tb-gray-600); letter-spacing: 0.04em; }
+  .rs-doc h5 { margin-top: 12px; font-family: var(--font-display); font-weight: 600; font-size: 19px; letter-spacing: -0.02em; }
+  .rs-doc .m { margin-top: 2px; font-size: 11.5px; color: var(--tb-gray-600); }
+  .rs-doc .hd, .rs-doc .ln3 { display: flex; justify-content: space-between; font-size: 12.5px; padding: 9px 6px; }
+  .rs-doc .hd { margin-top: 12px; font-size: 10.5px; color: var(--tb-gray-400); border-bottom: 1px solid var(--tb-gray-200); }
+  .rs-doc .ln3 { border-bottom: 1px solid var(--tb-gray-100); }
+  .rs-doc .ln3 b { font-weight: 500; }
+  .rs-doc .ln3.hl { background: rgb(0 245 0 / 0.16); border-radius: 3px; box-shadow: 0 0 0 2px var(--tb-forest-800); border-bottom-color: transparent; }
+  .rs-doc .note { margin-top: 10px; font-size: 10.5px; color: var(--tb-gray-400); }
+  .rs-draft {
+    position: absolute; right: 6%; bottom: 30px; width: min(280px, 50%); background: var(--tb-forest-950); color: var(--tb-cream-50);
+    border-radius: var(--r-inner); padding: 16px 18px; box-shadow: var(--shadow-float);
+  }
+  .rcard:not(.is-in) .rs-draft { transform: translateX(32px); }
+  .rs-draft .t { display: flex; align-items: center; gap: 8px; font-family: var(--font-display); font-weight: 600; font-size: 14px; }
+  .rs-draft .t svg { width: 15px; height: 15px; color: var(--tb-lime-500); }
+  .rs-draft .ln3 { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #1E3A37; font-size: 13px; color: #B9C2BC; }
+  .rs-draft .ln3 b { color: var(--tb-cream-50); font-weight: 500; }
+  .rs-draft .wait { margin-top: 12px; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 10px; border-radius: var(--r-pill); background: var(--tb-sand-200); color: #5B4A1F; font-size: 11.5px; font-weight: 500; }
+  .rs-draft .wait i { width: 6px; height: 6px; border-radius: 50%; background: #5B4A1F; }
+
+  /* ecommerce: the same record on three surfaces */
+  .rs-surfaces { position: absolute; inset: 0; display: grid; grid-template-columns: 1.15fr 0.85fr; grid-template-rows: 1fr 1fr; gap: 14px; padding: 24px; }
+  .rs-tile { background: #fff; border: 1px solid var(--hairline); border-radius: var(--r-inner); padding: 16px; display: flex; flex-direction: column; justify-content: center; gap: 8px; }
+  .rcard:not(.is-in) .rs-tile { transform: translateY(16px); }
+  .rs-tile:nth-child(2) { transition-delay: 80ms; }
+  .rs-tile:nth-child(3) { transition-delay: 160ms; }
+  .rs-tile.pdp { grid-row: 1 / 3; }
+  .rs-tile .lbl { font-size: 11px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--tb-gray-400); }
+  .rs-tile .tbw-btn { margin-top: 4px; }
+  .rs-tile .rr { font-size: 12.5px; }
+  .rs-tile .ttl { font-family: var(--font-display); font-weight: 600; font-size: 15px; letter-spacing: -0.01em; }
+  .rs-tile.qrt { flex-direction: row; align-items: center; justify-content: flex-start; gap: 14px; }
+  .rs-tile.qrt .qr { width: 72px; height: 72px; padding: 5px; border: 1px solid var(--hairline); flex: none; }
+  .rs-look { display: flex; gap: 6px; }
+  .rs-look .f { flex: 1; height: 36px; border-radius: var(--r-pill); border: 1px solid rgb(10 33 32 / 0.2); display: flex; align-items: center; padding: 0 14px; font-size: 13px; font-weight: 500; }
+  .rs-look .f i { width: 1.5px; height: 15px; background: var(--tb-gray-900); margin-left: 1px; animation: blink 1s steps(1) infinite; }
+  .rs-look .b { height: 36px; padding: 0 14px; border-radius: var(--r-pill); background: var(--tb-forest-800); color: #fff; display: grid; place-items: center; font: 600 12px/1 var(--font-display); }
+  @media (max-width: 1000px) {
+    .cats { grid-template-columns: repeat(2, 1fr); }
+    .rpts { grid-template-columns: 1fr; gap: var(--space-4); }
+  }
+  @media (max-width: 900px) {
+    .who-top, .roles { grid-template-columns: 1fr; gap: var(--space-5); }
+    .roles { margin-top: var(--space-16); }
+    /* mobile: only the pills stay pinned, just under the header */
+    .roles-head { display: contents; }
+    .role-pills { position: sticky; top: 80px; z-index: 5; margin: 0 calc(var(--gutter) * -1); padding: 10px var(--gutter); background: rgb(255 255 255 / 0.94); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+    .role-pill { height: 36px; padding: 0 14px; font-size: 0.875rem; }
+    .role-pill i { display: none; }
+    .rcard { padding: 20px; scroll-margin-top: 140px; }
+    .rstage { height: 280px; }
+    .rs-prod { left: 4%; transform: scale(1); }
+    .rs-widget { right: 4%; width: 62%; padding: 12px; }
+    .rs-doc { left: 4%; width: 74%; padding: 14px; }
+    .rs-doc { top: 16px; }
+    .rs-draft { right: 4%; width: 54%; padding: 10px 12px; bottom: 12px; }
+    .rs-draft .ln3 { padding: 7px 0; font-size: 12px; }
+    .rs-draft .wait { font-size: 10.5px; padding: 0 8px; }
+    .rs-surfaces { grid-template-columns: 1fr 1fr; padding: 14px; gap: 10px; }
+    .rs-tile { padding: 12px; }
+    .rs-tile.qrt { flex-direction: column; align-items: flex-start; }
+    .rs-tile.qrt .qr { width: 52px; height: 52px; }
+  }
+  @media (max-width: 560px) {
+    .cats { gap: 10px; }
+    .cat-stage { height: 170px; padding-bottom: 18px; }
+    .cat-stage .prod { transform: scale(0.78); transform-origin: 50% 100%; }
+    .cat:hover .prod { transform: scale(0.78) translateY(-8px); }
+    .cat-body { padding: 14px 14px 16px; }
+    .cat h3 { font-size: 1rem; }
+    .cat .ex { font-size: 12.5px; }
+  }
+
+  /* ---------- Closing CTA + footer ---------- */
+  .end { position: relative; overflow: clip; background: var(--tb-forest-800); color: var(--tb-cream-50); padding: clamp(5rem, 12vw, 10rem) var(--gutter); }
+  .end-papers { position: absolute; inset: 0; pointer-events: none; }
+  .end-paper {
+    position: absolute; width: clamp(110px, 12vw, 180px); aspect-ratio: 1 / 1.3; border-radius: 3px;
+    background: rgb(244 243 234 / 0.06); border: 1px solid rgb(244 243 234 / 0.12);
+    padding: 7%; display: flex; flex-direction: column; gap: 6%; will-change: transform;
+  }
+  .end-paper i { display: block; height: 3px; border-radius: 2px; background: rgb(244 243 234 / 0.14); }
+  .end-in { position: relative; max-width: var(--container-max); margin: 0 auto; display: grid; grid-template-columns: 1.35fr 1fr; gap: clamp(40px, 6vw, 112px); align-items: center; }
+  .end .eyebrow { color: rgb(244 243 234 / 0.6); }
+  .end h2 {
+    margin-top: var(--space-5); font-family: var(--font-display); font-weight: 500; font-size: clamp(2.75rem, 5.6vw, 5.5rem);
+    line-height: 1.0; letter-spacing: -0.035em; max-width: 14ch; text-wrap: balance;
+  }
+  .end h2 span { color: var(--tb-lime-500); }
+  .end-copy > p { margin-top: var(--space-6); font-size: var(--text-lg); line-height: var(--leading-normal); color: #CFE0D4; max-width: 38ch; }
+  .end-ctas { margin-top: var(--space-10); display: flex; flex-wrap: wrap; gap: var(--space-4); align-items: center; }
+  .end-ctas .ghost { display: inline-flex; align-items: center; gap: 8px; color: var(--tb-cream-50); text-decoration: none; font-family: var(--font-display); font-weight: 600; font-size: var(--text-base); padding: var(--space-4) var(--space-2); }
+  .end-ctas .ghost svg { width: 16px; height: 16px; transition: transform 0.3s var(--ease-reveal); }
+  .end-ctas .ghost:hover svg { transform: translateY(-3px); }
+  .end-ctas .btn:focus-visible, .end-ctas .ghost:focus-visible { outline: 2px solid var(--tb-lime-500); outline-offset: 3px; }
+
+  .setup { background: var(--tb-cream-50); color: var(--tb-gray-900); border-radius: var(--radius-lg); padding: clamp(24px, 3vw, 36px); box-shadow: 0 40px 80px -40px rgb(0 0 0 / 0.5); }
+  .setup h3 { font-family: var(--font-display); font-weight: 600; font-size: 1.5rem; letter-spacing: -0.02em; line-height: 1.15; }
+  .setup > p { margin-top: var(--space-2); font-size: 0.9375rem; line-height: 1.5; color: var(--tb-gray-600); }
+  .setup form { margin-top: var(--space-6); display: grid; gap: var(--space-4); }
+  .field label { display: block; font-size: var(--text-sm); font-weight: 500; margin-bottom: 6px; }
+  .field input, .field select {
+    width: 100%; height: 46px; border-radius: 6px; border: 1px solid #D9D9D6; background: #fff; padding: 0 14px;
+    font-size: var(--text-base); color: var(--tb-gray-900); transition: border-color 0.2s var(--ease-ui), box-shadow 0.2s var(--ease-ui);
+  }
+  .field input::placeholder { color: var(--tb-gray-400); }
+  .field input:focus, .field select:focus { outline: none; border-color: var(--tb-forest-800); box-shadow: 0 0 0 3px rgb(3 86 49 / 0.15); }
+  .setup .submit { margin-top: var(--space-2); width: 100%; justify-content: center; background: var(--tb-forest-800); color: #fff; height: 48px; }
+  .setup .submit:hover { background: var(--tb-forest-700); }
+  .setup .fine { font-size: 12px; color: var(--tb-gray-400); }
+  .setup .done { display: none; margin-top: var(--space-6); padding: var(--space-5); border-radius: var(--radius-md); background: #fff; border: 1px solid var(--tb-gray-200); }
+  .setup .done b { display: block; font-family: var(--font-display); font-weight: 600; font-size: 1.125rem; letter-spacing: -0.01em; }
+  .setup .done span { display: block; margin-top: 4px; font-size: var(--text-sm); color: var(--tb-gray-600); }
+  .setup.is-sent form { display: none; }
+  .setup.is-sent .done { display: block; animation: rise 0.5s var(--ease-reveal) both; }
+
+  .foot { background: var(--tb-forest-950); color: #B9C2BC; padding: var(--space-16) var(--gutter) var(--space-10); }
+  .foot-in { max-width: var(--container-max); margin: 0 auto; }
+  .foot-top { display: flex; justify-content: space-between; gap: var(--space-10); flex-wrap: wrap; padding-bottom: var(--space-10); border-bottom: 1px solid #1E3A37; }
+  .foot .logo { color: var(--tb-cream-50); font-size: 1.5rem; }
+  .foot-top p { margin-top: var(--space-3); max-width: 34ch; font-size: var(--text-sm); line-height: 1.5; }
+  .foot-links { display: flex; gap: clamp(32px, 6vw, 96px); }
+  .foot-links b { display: block; color: var(--tb-cream-50); font-size: var(--text-sm); font-weight: 600; margin-bottom: var(--space-3); }
+  .foot-links a { display: block; color: #B9C2BC; text-decoration: none; font-size: var(--text-sm); padding: 4px 0; transition: color 0.2s var(--ease-ui); }
+  .foot-links a:hover { color: var(--tb-lime-500); }
+  .foot-bottom { padding-top: var(--space-6); display: flex; justify-content: space-between; gap: var(--space-6); flex-wrap: wrap; font-size: 12px; color: #7F8C86; }
+  .foot-bottom p { max-width: 70ch; line-height: 1.5; }
+
+  @media (max-width: 900px) {
+    .end-in { grid-template-columns: 1fr; }
+    .end-ctas { margin-top: var(--space-8); }
+  }
+  @media (max-width: 560px) {
+    .foot-links { flex-direction: column; gap: var(--space-6); }
+  }
+
+
+  @media (max-width: 700px) {
+    :root { --paper-w: clamp(96px, 30vw, 140px); }
+    .nav-link { display: none; }
+    .nav-cta { padding-left: 7px; }
+    .nav-cta .btn { padding: 0 14px; }
+    .copy p { font-size: var(--text-base); }
+  }
+  /* ---------- Product materials: light, label wrap and grain so packs read as objects, not icons ---------- */
+  :root {
+    --cyl: linear-gradient(90deg, rgb(0 0 0 / 0.16) 0%, rgb(0 0 0 / 0.03) 11%, rgb(255 255 255 / 0.42) 24%, rgb(255 255 255 / 0.1) 36%, rgb(255 255 255 / 0) 58%, rgb(0 0 0 / 0.08) 80%, rgb(0 0 0 / 0.24) 100%);
+    --pouch: linear-gradient(90deg, rgb(0 0 0 / 0.1) 0%, rgb(0 0 0 / 0) 16%, rgb(255 255 255 / 0.5) 30%, rgb(255 255 255 / 0) 46%, rgb(0 0 0 / 0.04) 72%, rgb(0 0 0 / 0.14) 100%);
+    --grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.55 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  }
+  .jar .lid, .jar .body, .hjar .lid, .hjar .body, .hjar .label,
+  .p-tub .lid, .p-tub .bd, .p-tub .lb, .p-bottle .cap, .p-bottle .bd, .p-bottle .lb,
+  .p-vit .cap, .p-vit .bd, .p-vit .lb, .pouch-bag, .p-pouch .bd { overflow: hidden; isolation: isolate; }
+  .jar .lid::after, .jar .body::after, .hjar .lid::after, .hjar .body::after, .hjar .label::after,
+  .p-tub .lid::after, .p-tub .bd::after, .p-tub .lb::after, .p-bottle .cap::after, .p-bottle .bd::after, .p-bottle .lb::after,
+  .p-vit .cap::after, .p-vit .bd::after, .p-vit .lb::after {
+    content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; background: var(--cyl);
+  }
+  .pouch-bag::after, .p-pouch .bd::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: var(--pouch); }
+  .hjar .body::before, .hjar .label::before, .p-tub .bd::before, .p-tub .lb::before, .p-bottle .bd::before,
+  .p-vit .lb::before, .pouch-bag::before, .p-pouch .bd::before {
+    content: ""; position: absolute; inset: 0; pointer-events: none; background: var(--grain); opacity: 0.18; mix-blend-mode: multiply;
+  }
+  /* lids: rim highlight on top, shadow where they meet the body */
+  .hjar .lid, .p-tub .lid, .jar .lid { box-shadow: inset 0 2px 0 rgb(255 255 255 / 0.16), inset 0 -4px 0 rgb(0 0 0 / 0.28); }
+  .p-bottle .cap, .p-vit .cap { box-shadow: inset 0 2px 0 rgb(255 255 255 / 0.2), inset 0 -3px 0 rgb(0 0 0 / 0.2); }
+  /* less toy-like proportions */
+  .hjar .body { border-radius: 18px 18px 22px 22px; }
+  .hjar .lid { left: 10px; right: 10px; height: 52px; border-radius: 9px 9px 3px 3px; }
+  .p-tub .bd { border-radius: 9px 9px 12px 12px; }
+  .p-vit .bd { border-radius: 9px; }
+
+  /* section 4 label: the small print that makes it read as a real pack */
+  .hjar .label { padding: 18px 22px 14px; }
+  .hjar .label .brand { font-size: 9.5px; font-weight: 600; letter-spacing: 0.22em; color: var(--tb-forest-800); }
+  .hjar .label b { margin-top: 10px; font-size: 32px; }
+  .hjar .label .sub { margin-top: 6px; font-size: 10.5px; color: #5B4A1F; }
+  .hjar .label .rule { display: block; height: 1px; margin: 10px 0 8px; background: rgb(91 74 31 / 0.35); }
+  .hjar .label .facts { margin-top: 0; font-size: 10px; color: #5B4A1F; }
+  .hjar .label .facts i { font-style: normal; font-weight: 700; color: var(--tb-gray-900); font-size: 12px; }
+  .hjar .label .foot2 { margin-top: auto; display: flex; justify-content: space-between; align-items: center; }
+  .hjar .label .foot2 .lotline { margin-top: 0; }
+  .hjar .label .net { margin-top: 0; font-size: 8.5px; letter-spacing: 0.04em; color: #5B4A1F; }
+  /* ---------- Persistent sample QR (after See for Yourself): QR is a real TrueBatch surface ---------- */
+  .qr-chip {
+    position: fixed; right: 20px; bottom: 20px; z-index: 40; display: flex; align-items: center; gap: 12px;
+    padding: 10px 14px 10px 10px; border-radius: 16px; background: rgb(255 255 255 / 0.95);
+    -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+    border: 1px solid rgb(10 33 32 / 0.08); box-shadow: 0 16px 40px -20px rgb(10 33 32 / 0.45);
+    color: var(--tb-gray-900); text-decoration: none;
+    opacity: 0; transform: translateY(12px); pointer-events: none;
+    transition: opacity 0.4s var(--ease-reveal), transform 0.5s var(--ease-reveal);
+  }
+  .qr-chip.is-on { opacity: 1; transform: none; pointer-events: auto; }
+  .qr-chip .qr { width: 58px; height: 58px; padding: 4px; border: 1px solid var(--tb-gray-200); }
+  .qr-chip b { display: block; font-family: var(--font-display); font-weight: 600; font-size: 13.5px; letter-spacing: -0.01em; }
+  .qr-chip span { display: block; margin-top: 2px; font-size: 12px; color: var(--tb-gray-600); }
+  .qr-chip:hover { box-shadow: 0 0 0 2px var(--tb-lime-500), 0 16px 40px -20px rgb(10 33 32 / 0.45); }
+  @media (max-width: 900px) { .qr-chip { display: none; } }
+  /* =====================================================================
+     TrueBatch visual system: one rule per role, applied to every section
+     - Controls (buttons, tabs, chips, tags, inputs) .......... pill
+     - Surfaces (cards, panels, sheets) ......................... 16px
+     - Surfaces nested inside a surface ......................... 10px
+     - Physical objects (paper, packs, phones) keep real-world corners
+     - Elevation: flat = hairline border, no shadow
+                  float = one shadow, only for things that float
+                  (header, QR card, demonstrated product UI, card hover)
+     ===================================================================== */
+  :root {
+    --r-pill: 999px; --r-card: var(--radius-lg); --r-inner: 10px;
+    --hairline: rgb(10 33 32 / 0.09);
+    --shadow-float: 0 22px 48px -26px rgb(10 33 32 / 0.38), 0 2px 6px -2px rgb(10 33 32 / 0.06);
+    --chevron: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none' stroke='%23212121' stroke-width='1.6'><path d='M2.5 4.5 6 8l3.5-3.5'/></svg>");
+  }
+
+  /* Buttons: one family. Sizes 52 / 40 / 34. Variants: primary (lime), dark (in-product), outline. */
+  .btn { height: 40px; padding: 0 20px; gap: 10px; border-radius: var(--r-pill); justify-content: center; font-size: 0.9375rem; line-height: 1; white-space: nowrap; }
+  .btn--lg { height: 52px; padding: 0 26px; gap: 12px; font-size: var(--text-base); }
+  .nav-cta .btn { height: 40px; padding: 0 18px; gap: 10px; }
+  .tbw-btn, .approve, .coa, .add, .m-cta, .tb-w .tbw-btn, .lots .go, .m-phone .btn-sm, .m-field .b, .setup .submit { border-radius: var(--r-pill); }
+  .tbw-btn { height: 40px; padding: 0 8px 0 6px; }
+  .tb-w .tbw-btn { height: 32px; padding: 0 10px 0 5px; }
+  .tb-badge { border-radius: 50%; width: 26px; height: 26px; font-size: 12px; }
+  .tb-w .tb-badge { width: 22px; height: 22px; font-size: 10.5px; }
+  .approve { height: 34px; padding: 0 16px; }
+  .coa { height: 40px; padding: 0 16px; border-radius: var(--r-pill); }
+  .add { height: 40px; }
+  .m-cta { height: 34px; }
+  .lots .go { padding: 6px 12px; }
+  .m-phone .btn-sm { padding: 8px; }
+  .m-field .b { padding: 0 16px; }
+  .setup .submit { height: 52px; }
+
+  /* Inputs: pill, same height as large buttons */
+  .field input, .field select { height: 52px; border-radius: var(--r-pill); padding: 0 20px; border-color: rgb(10 33 32 / 0.16); }
+  .field select { -webkit-appearance: none; appearance: none; background: #fff var(--chevron) no-repeat right 20px center; padding-right: 44px; }
+  .m-field .f { border-radius: var(--r-pill); padding: 0 14px; }
+
+  /* Tabs */
+
+  /* Chips & tags: one recipe, pill, 24px tall */
+  .lot, .cat-lot, .sample, .st .flag, .pill, .panels span, .lchip, .chip {
+    border-radius: var(--r-pill); display: inline-flex; align-items: center; height: 24px; padding: 0 10px; line-height: 1; white-space: nowrap;
+  }
+  .lot { font-size: 11px; gap: 4px; padding: 0 8px 0 10px; }
+  .tb-w .lot { height: 20px; padding: 0 8px; }
+  .sample { height: 20px; font-size: 10px; letter-spacing: 0.01em; padding: 0 8px; }
+  .qual { border-radius: var(--r-pill); padding: 0 6px; }
+  .st .flag { height: 22px; padding: 0 9px; }
+  .st .flag { display: none; }
+  .drow.is-flagged:not(.is-checked) .st .flag { display: inline-flex; }
+  .lchip { height: 28px; padding: 0 12px; }
+  .tb-spot::after { border-radius: var(--r-pill); padding: 3px 8px; }
+
+  /* Surfaces: 16px; nested: 10px; flat by default */
+  .scard, .cat, .rcard, .setup, .qr-chip, .draft, .drop { border-radius: var(--r-card); }
+  .scard, .cat, .rcard { border: 1px solid var(--hairline); box-shadow: none; }
+  .scard-copy { padding: 24px 24px 0; }
+  .scard-num { right: 24px; top: 24px; }
+  .cat-body { padding: 20px 24px 24px; }
+  .cat-lot { top: 16px; right: 16px; }
+  .setup { box-shadow: none; }
+  .tbw, .tb-w, .lots, .file, .setup .done, .pouch, .qr-chip .qr { border-radius: var(--r-inner); }
+  .lots { overflow: hidden; }
+  .mock { border-radius: var(--r-inner) 0 0 0; left: 24px; top: 164px; box-shadow: none; border: 1px solid var(--hairline); border-right: 0; border-bottom: 0; }
+  .sheet { border-radius: var(--r-card) var(--r-card) 0 0; }
+
+  /* Float: one shadow, only for things that float */
+  .nav-pill { border-radius: var(--r-pill); box-shadow: var(--shadow-float); }
+  .qr-chip, .draft { box-shadow: var(--shadow-float); }
+
+  /* Card hover: same everywhere */
+  .scard, .cat { transition: transform 0.45s var(--ease-reveal), box-shadow 0.45s var(--ease-reveal), border-color 0.3s var(--ease-ui); }
+  .scard:hover, .scard:focus-visible, .cat:hover { transform: translateY(-4px); box-shadow: var(--shadow-float); border-color: rgb(10 33 32 / 0.14); }
+
+  @media (max-width: 700px) {
+    .scard-copy { padding: 20px 20px 0; }
+    .scard-num { right: 20px; top: 20px; }
+    .mock { left: 20px; top: 150px; }
+  }
+  @media (max-width: 900px) {
+  }
+  @media (max-width: 560px) {
+    .cat-body { padding: 16px 16px 18px; }
+    .cat-lot { top: 12px; right: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<a class="qr-chip" id="qr-chip" href="#surfaces" aria-label="Sample result for lot A2419">
+  <span class="qr" data-qr aria-hidden="true"></span>
+  <div><b>Scan a sample result</b><span>Plant Protein · Lot A2419</span></div>
+</a>
+
+<header class="nav is-joined" id="nav">
+  <div class="nav-pill nav-logo" id="nav-logo">
+    <a class="logo" href="#"><span class="logo-mark" aria-hidden="true">T</span>TrueBatch</a>
+  </div>
+  <div class="nav-pill nav-cta" id="nav-cta">
+    <a class="nav-link" href="#how">How it works</a>
+    <a class="btn" href="#start">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3 5h10l-.8 8.2a1 1 0 0 1-1 .8H4.8a1 1 0 0 1-1-.8L3 5Z"/><path d="M5.5 5V4a2.5 2.5 0 0 1 5 0v1"/></svg>
+      <span>Install on Shopify</span>
+    </a>
+  </div>
+</header>
+
+<main>
+  <section class="hero" id="hero" aria-label="Introduction">
+    <div class="stage">
+      <div class="papers" id="papers" aria-hidden="true"></div>
+
+      <div class="copy" id="copy">
+        <h1>Put your lab results to work</h1>
+        <p>Publish batch results on your store and product packaging, along with a copy of the lab report.</p>
+        <a class="btn btn--lg" href="#">Install now
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+        </a>
+      </div>
+
+      <div class="scroll-hint" id="hint" aria-hidden="true">Scroll<i></i></div>
+
+      <div class="phone-wrap" id="phone">
+        <div class="phone">
+          <div class="screen" id="screen">
+            <div class="island"></div>
+            <div class="status">
+              <span>9:41</span>
+              <span class="icons" aria-hidden="true">
+                <span style="width:3px;height:5px"></span><span style="width:3px;height:7px"></span><span style="width:3px;height:9px"></span>
+                <span style="width:22px;height:10px;border-radius:3px;margin-left:4px"></span>
+              </span>
+            </div>
+            <div class="store-bar">
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 6h14M3 10h14M3 14h14"/></svg>
+              <b>Your store</b>
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 7h12l-1 9H5L4 7Z"/><path d="M7.5 7V6a2.5 2.5 0 0 1 5 0v1"/></svg>
+            </div>
+
+            <div class="pdp">
+              <div class="shot">
+                <div class="jar"><div class="lid"></div><div class="body"><b>Plant Protein</b><small>Vanilla · 500 g</small></div></div>
+                <div class="dots"><i></i><i></i><i></i></div>
+              </div>
+              <div class="pdp-info">
+                <h3>Plant Protein / Vanilla</h3>
+                <div class="meta"><span>Pea &amp; rice protein · 500 g</span><span class="price">$38.00</span></div>
+              </div>
+
+              <div class="tbw">
+                <div class="tbw-top">
+                  <span class="tbw-label">Lab results · Lot</span>
+                  <span class="lot">A2419
+                    <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2 4l3 3 3-3"/></svg>
+                  </span>
+                </div>
+                <button class="tbw-btn" id="open" type="button" tabindex="-1">
+                  <span class="lbl"><span class="tb-badge" aria-hidden="true">T</span>View lab results</span>
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+                  <span class="tap" aria-hidden="true"></span>
+                </button>
+                <div class="tbw-foot">Lot number is printed on the jar base</div>
+              </div>
+              <div class="add">Add to cart</div>
+            </div>
+
+            <div class="scrim" id="scrim"></div>
+            <div class="sheet" role="dialog" aria-label="Lab results for lot A2419" aria-hidden="true" id="sheet">
+              <div class="grab"></div>
+              <div class="sheet-head">
+                <div class="t">
+                  <h4>Lab results</h4>
+                  <button class="x" id="close" type="button" aria-label="Close" tabindex="-1">
+                    <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2l8 8M10 2l-8 8"/></svg>
+                  </button>
+                </div>
+                <span class="sample">Illustrative sample</span>
+                <dl class="sheet-meta">
+                  <div><dt>Lot</dt><dd>A2419</dd></div>
+                  <div><dt>Tested</dt><dd>12 Sep 2026</dd></div>
+                  <div><dt>Laboratory</dt><dd>Northfield Analytical</dd></div>
+                  <div><dt>Report ID</dt><dd>NFA-80412</dd></div>
+                </dl>
+              </div>
+              <div class="sheet-body">
+                <div class="grp">Heavy metals</div>
+                <div class="res">
+                  <div class="res-top"><span class="res-name">Lead <small>Pb</small></span><span class="res-val">3.2 ppb</span></div>
+                  <div class="res-sub"><span>LOQ 1.0 ppb</span><span>ICP-MS</span></div>
+                </div>
+                <div class="res">
+                  <div class="res-top"><span class="res-name">Arsenic <small>As</small></span><span class="res-val nd">Not Detected</span></div>
+                  <div class="res-sub"><span>LOQ 2.0 ppb</span><span>ICP-MS</span></div>
+                </div>
+                <div class="res">
+                  <div class="res-top"><span class="res-name">Cadmium <small>Cd</small></span><span class="res-val">1.1 ppb</span></div>
+                  <div class="res-sub"><span>LOQ 0.5 ppb</span><span>ICP-MS</span></div>
+                </div>
+                <div class="res">
+                  <div class="res-top"><span class="res-name">Mercury <small>Hg</small></span><span class="res-val">&lt;0.5 ppb</span></div>
+                  <div class="res-sub"><span>Below LOQ 0.5 ppb</span><span>ICP-MS</span></div>
+                </div>
+                <div class="grp">Nutrients</div>
+                <div class="res">
+                  <div class="res-top"><span class="res-name">Protein</span><span class="res-val">24.1 g</span></div>
+                  <div class="res-sub"><span>Per 30 g serving</span><span>Dumas</span></div>
+                </div>
+              </div>
+              <div class="sheet-foot">
+                <a class="coa" href="#" tabindex="-1">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M4 1.5h5.5L13 5v9.5H4z"/><path d="M9.5 1.5V5H13M6 8.5h4.5M6 11h4.5"/></svg>
+                  View original lab report (PDF)
+                </a>
+                <p>Values and units as reported by the laboratory.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="caption" id="caption">Illustrative sample</div>
+    </div>
+  </section>
+
+  <section class="hiw" id="how" aria-labelledby="how-title">
+    <div class="hiw-track" id="how-track">
+      <div class="hiw-stage">
+        <div class="hiw-head">
+          <span class="eyebrow">How it works</span>
+          <h2 id="how-title">From lab report to reviewed record</h2>
+          <ol class="steps" id="steps">
+            <li class="step is-active">
+              <div class="step-top"><span class="step-num">01</span><span class="step-title">Upload</span></div>
+              <p class="step-desc">Start with the certificate of analysis your lab already sends you.</p>
+            </li>
+            <li class="step">
+              <div class="step-top"><span class="step-num">02</span><span class="step-title">Extract</span></div>
+              <p class="step-desc">Results, units, qualifiers, dates and lot details become a structured draft.</p>
+            </li>
+            <li class="step">
+              <div class="step-top"><span class="step-num">03</span><span class="step-title">Review</span></div>
+              <p class="step-desc">Your team checks each field against its line in the original report before anything is published.</p>
+            </li>
+          </ol>
+          <p class="step-now" id="step-now" aria-hidden="true"></p>
+        </div>
+
+        <div class="desk" id="desk">
+          <div class="coa-wrap">
+            <div class="drop" id="drop" aria-hidden="true">
+              <span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 15v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4"/></svg>
+                Drop a lab report (PDF)
+              </span>
+            </div>
+            <article class="coa-doc" id="coa" aria-label="Sample certificate of analysis">
+              <div class="scan" id="scan"></div>
+              <div class="coa-hd">
+                <div class="coa-lab"><i></i>Northfield Analytical</div>
+                <div class="coa-ttl">Certificate of Analysis<small>Report NFA-80412</small></div>
+              </div>
+              <dl class="coa-meta">
+                <dt class="opt">Client</dt><dd class="opt">Example Brand Co.</dd>
+                <dt>Sample</dt><dd><span class="src" data-src="0">Plant Protein / Vanilla</span></dd>
+                <dt>Lot no.</dt><dd><span class="src" data-src="1">A2419</span></dd>
+                <dt class="opt">Received</dt><dd class="opt">05 Sep 2026</dd>
+                <dt>Reported</dt><dd><span class="src" data-src="2">12 Sep 2026</span></dd>
+              </dl>
+              <table class="coa-tbl">
+                <thead><tr><th>Analyte</th><th>Result</th><th>Units</th><th>LOQ</th><th>Method</th></tr></thead>
+                <tbody>
+                  <tr class="src" data-src="3"><td>Lead</td><td>3.2</td><td>ppb</td><td>1.0</td><td>ICP-MS</td></tr>
+                  <tr class="src" data-src="4"><td>Arsenic</td><td>ND</td><td>ppb</td><td>2.0</td><td>ICP-MS</td></tr>
+                  <tr class="src" data-src="5"><td>Cadmium</td><td>1.1</td><td>ppb</td><td>0.5</td><td>ICP-MS</td></tr>
+                  <tr class="src" data-src="6"><td>Mercury</td><td>&lt;0.5</td><td>ppb</td><td>0.5</td><td>ICP-MS</td></tr>
+                </tbody>
+              </table>
+              <div class="coa-ft">
+                <span>ND = Not Detected at or above LOQ</span>
+                <span class="sig">Laboratory director</span>
+              </div>
+            </article>
+            <div class="file" id="file" aria-hidden="true">
+              <div><b>COA_A2419.pdf</b><span id="file-pct">0%</span></div>
+              <div class="bar"><i id="file-bar" style="width:0;transition:none"></i></div>
+            </div>
+          </div>
+
+          <div class="draft" id="draft" aria-label="Extracted draft">
+            <div class="draft-hd">
+              <div><b>Draft record</b><small>from COA_A2419.pdf</small></div>
+              <span class="pill" id="draft-pill">Waiting for report</span>
+            </div>
+            <dl class="draft-meta">
+              <div><dt>Product</dt><dd class="dst" data-dst="0"><span class="sk"></span><span class="v">Plant Protein / Vanilla</span></dd></div>
+              <div><dt>Lot</dt><dd class="dst" data-dst="1" data-review="0"><span class="sk"></span><span class="v">A2419</span>
+                <svg class="tick" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 7.5l2.5 2.5L11 4.5"/></svg></dd></div>
+              <div><dt>Test date</dt><dd class="dst" data-dst="2"><span class="sk"></span><span class="v">12 Sep 2026</span></dd></div>
+            </dl>
+            <div class="dhead"><span>Analyte</span><span>Result</span><span>Unit</span><span>Review</span></div>
+            <div class="drow dst" data-dst="3" data-review="1"><span class="an"><span class="sk"></span><span class="v">Lead</span></span><span class="rv"><span class="v">3.2</span></span><span class="un"><span class="v">ppb</span></span>
+              <span class="st"><span class="dash">—</span><span class="wait">Unchecked</span><span class="ok"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 7.5l2.5 2.5L11 4.5"/></svg>Matches source</span></span></div>
+            <div class="drow dst" data-dst="4" data-review="2"><span class="an"><span class="sk"></span><span class="v">Arsenic</span></span><span class="rv"><span class="v">Not Detected</span></span><span class="un"><span class="v">ppb</span></span>
+              <span class="st"><span class="dash">—</span><span class="wait">Unchecked</span><span class="ok"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 7.5l2.5 2.5L11 4.5"/></svg>Matches source</span></span></div>
+            <div class="drow dst" data-dst="5" data-review="3"><span class="an"><span class="sk"></span><span class="v">Cadmium</span></span><span class="rv"><span class="v">1.1</span></span><span class="un"><span class="v">ppb</span></span>
+              <span class="st"><span class="dash">—</span><span class="wait">Unchecked</span><span class="ok"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 7.5l2.5 2.5L11 4.5"/></svg>Matches source</span></span></div>
+            <div class="drow dst" data-dst="6" data-review="4" data-flag><span class="an"><span class="sk"></span><span class="v">Mercury</span></span><span class="rv"><span class="v">&lt; 0.5<span class="qual">&lt;LOQ</span></span></span><span class="un"><span class="v">ppb</span></span>
+              <span class="st"><span class="dash">—</span><span class="wait">Unchecked</span><span class="flag">Check qualifier</span><span class="ok"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 7.5l2.5 2.5L11 4.5"/></svg>Matches source</span></span></div>
+            <div class="draft-ft">
+              <span class="count" id="count">0 of 5 checked</span>
+              <button class="approve" id="approve" type="button" tabindex="-1">Approve &amp; publish</button>
+            </div>
+          </div>
+
+          <svg class="link-line" id="link" aria-hidden="true"><path d=""/><circle r="3"/><circle r="3"/></svg>
+          <div class="chips" id="chips" aria-hidden="true"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="show" id="surfaces" aria-labelledby="show-title">
+    <div id="show-track">
+      <div class="show-stage">
+        <div class="show-head" id="show-head">
+          <span class="eyebrow">Where results appear</span>
+          <h2 id="show-title">Show approved lab results <br><span>where customers shop.</span></h2>
+        </div>
+        <div class="show-row" id="show-row">
+            <a class="scard" href="#">
+              <div class="scard-copy">
+                <span class="scard-num">01</span>
+                <h3>On product pages</h3>
+                <p>Lot-specific results sit beside the product, right where people decide to buy.</p>
+                <span class="more">View example <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span>
+              </div>
+              <div class="mock" aria-hidden="true"><div class="mock-in">
+                <div class="m-ann">Free shipping on orders over $50</div>
+                <div class="m-nav"><span class="m-logo"><i>✻</i>morrow</span><span>Shop</span><span>Ingredients</span><span>Lab results</span>
+                  <svg class="bag" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 7h12l-1 9H5L4 7Z"/><path d="M7.5 7V6a2.5 2.5 0 0 1 5 0v1"/></svg></div>
+                <div class="m-body">
+                  <div class="pouch"><div class="pouch-bag"><small>morrow</small><b>daily<br>plant<br>protein</b><small>Vanilla · 500 g</small></div></div>
+                  <div>
+                    <div class="m-eyebrow">Plant protein</div>
+                    <div class="m-h">Plant Protein / Vanilla</div>
+                    <div class="m-p">Pea and rice protein, lightly sweetened. 24 g protein per scoop.</div>
+                    <div class="m-price">$38.00</div>
+                    <div class="tb-w tb-spot">
+                      <div class="top"><span>Lab results · Lot</span><span class="lot">A2419</span></div>
+                      <div class="rr"><b>Lead</b><span>3.2 <span class="u">ppb</span></span></div>
+                      <div class="rr"><b>Arsenic</b><span>Not Detected</span></div>
+                      <div class="tbw-btn"><span class="lbl"><span class="tb-badge">T</span>View lab results</span><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 8h10M9 4l4 4-4 4"/></svg></div>
+                    </div>
+                    <div class="m-cta">Add to cart · $38.00</div>
+                  </div>
+                </div>
+              </div></div>
+            </a>
+            <a class="scard" href="#">
+              <div class="scard-copy">
+                <span class="scard-num">02</span>
+                <h3>Browse published lots</h3>
+                <p>Every published batch in one place, so shoppers don’t need a lot code.</p>
+                <span class="more">View example <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span>
+              </div>
+              <div class="mock" aria-hidden="true"><div class="mock-in">
+                <div class="m-ann">Free shipping on orders over $50</div>
+                <div class="m-nav"><span class="m-logo"><i>✻</i>morrow</span><span>Shop</span><span>Ingredients</span><span>Lab results</span>
+                  <svg class="bag" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 7h12l-1 9H5L4 7Z"/><path d="M7.5 7V6a2.5 2.5 0 0 1 5 0v1"/></svg></div>
+                <div class="m-body">
+                  <div class="pouch"><div class="pouch-bag"><small>morrow</small><b>daily<br>plant<br>protein</b><small>Vanilla · 500 g</small></div></div>
+                  <div>
+                    <div class="m-eyebrow">Lab results</div>
+                    <div class="m-h">Batch results.</div>
+                    <div class="m-p">Results for every published lot of Plant Protein / Vanilla, with the original lab report.</div>
+                    <div class="lots tb-spot">
+                      <div class="hd"><span>Lot</span><span>Tested</span><span></span></div>
+                      <div class="ln2"><b>A2419</b><span>12 Sep 2026</span><span class="go">View results</span></div>
+                      <div class="ln2"><b>A2418</b><span>14 Aug 2026</span><span class="go">View results</span></div>
+                      <div class="ln2"><b>A2417</b><span>10 Jul 2026</span><span class="go">View results</span></div>
+                      <div class="ln2"><b>A2416</b><span>12 Jun 2026</span><span class="go">View results</span></div>
+                    </div>
+                  </div>
+                </div>
+              </div></div>
+            </a>
+            <a class="scard" href="#">
+              <div class="scard-copy">
+                <span class="scard-num">03</span>
+                <h3>Open results by QR</h3>
+                <p>A code printed on the pack opens the results for that exact lot.</p>
+                <span class="more">View example <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span>
+              </div>
+              <div class="mock" aria-hidden="true"><div class="mock-in">
+                <div class="m-ann">Free shipping on orders over $50</div>
+                <div class="m-nav"><span class="m-logo"><i>✻</i>morrow</span><span>Shop</span><span>Ingredients</span><span>Lab results</span>
+                  <svg class="bag" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 7h12l-1 9H5L4 7Z"/><path d="M7.5 7V6a2.5 2.5 0 0 1 5 0v1"/></svg></div>
+                <div class="m-body" style="grid-template-columns: 250px 1fr; align-items: center">
+                  <div class="pouch"><div class="pouch-bag"><small>morrow</small><b>daily<br>plant<br>protein</b><small>Vanilla · 500 g</small><div class="qr tb-spot" data-qr></div></div></div>
+                  <div class="m-phone">
+                    <h4>Plant Protein / Vanilla</h4>
+                    <div class="m">Lot A2419 · Tested 12 Sep 2026</div>
+                    <div style="margin-top:8px">
+                      <div class="rr"><b>Lead</b><span>3.2 <span class="u">ppb</span></span></div>
+                      <div class="rr"><b>Arsenic</b><span>Not Detected</span></div>
+                      <div class="rr"><b>Cadmium</b><span>1.1 <span class="u">ppb</span></span></div>
+                      <div class="rr"><b>Mercury</b><span>&lt;0.5 <span class="u">ppb</span></span></div>
+                    </div>
+                    <div class="btn-sm">View original COA</div>
+                  </div>
+                </div>
+              </div></div>
+            </a>
+            <a class="scard" href="#">
+              <div class="scard-copy">
+                <span class="scard-num">04</span>
+                <h3>Look up by lot</h3>
+                <p>Shoppers type the lot number printed on their pack and get its results.</p>
+                <span class="more">View example <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span>
+              </div>
+              <div class="mock" aria-hidden="true"><div class="mock-in">
+                <div class="m-ann">Free shipping on orders over $50</div>
+                <div class="m-nav"><span class="m-logo"><i>✻</i>morrow</span><span>Shop</span><span>Ingredients</span><span>Lab results</span>
+                  <svg class="bag" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 7h12l-1 9H5L4 7Z"/><path d="M7.5 7V6a2.5 2.5 0 0 1 5 0v1"/></svg></div>
+                <div class="m-body">
+                  <div class="pouch"><div class="pouch-bag"><small>morrow</small><b>daily<br>plant<br>protein</b><small>Vanilla · 500 g</small></div></div>
+                  <div>
+                    <div class="m-eyebrow">Lab results</div>
+                    <div class="m-h">Find your lot.</div>
+                    <div class="m-p">The lot number is printed on the base of the pouch.</div>
+                    <div class="m-field"><div class="f">A2419<i></i></div><div class="b">Look up</div></div>
+                    <div class="tb-w tb-spot">
+                      <div class="top"><span>Plant Protein / Vanilla · 12 Sep 2026</span><span class="lot">A2419</span></div>
+                      <div class="rr"><b>Lead</b><span>3.2 <span class="u">ppb</span></span></div>
+                      <div class="rr"><b>Cadmium</b><span>1.1 <span class="u">ppb</span></span></div>
+                      <div class="rr"><b>Mercury</b><span>&lt;0.5 <span class="u">ppb</span></span></div>
+                    </div>
+                  </div>
+                </div>
+              </div></div>
+            </a>
+        </div>
+        <div class="show-ui" id="show-ui" aria-hidden="true">
+          <span><b id="show-n">01</b> / 04</span>
+          <span class="track"><i id="show-bar"></i></span>
+          <span class="name" id="show-name">On product pages</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="lots-sec" id="lots" aria-labelledby="lots-title">
+    <div id="lots-track">
+      <div class="lots-stage">
+        <div class="lots-copy">
+          <span class="eyebrow">Recurring testing</span>
+          <h2 id="lots-title">Built for the next batch, <span>and the one after.</span></h2>
+          <p>You test lot after lot. Each new report goes through the same extract-and-review flow, and every lot keeps its own results and original report.</p>
+          <div class="lot-now" aria-live="polite">
+            <span class="lbl">Batch in the jar</span>
+            <span class="code" id="ln-code">A2416</span>
+            <span class="meta" id="ln-meta">Tested 12 Jun 2026</span>
+            <span class="lchip" id="ln-chip">Published</span>
+          </div>
+          <div class="lot-ticks" id="lot-ticks" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+        </div>
+        <div class="lots-scene-wrap" id="lots-wrap" aria-hidden="true">
+          <div class="lots-scene" id="lots-scene">
+            <div class="glow"></div>
+            <div id="hps"></div>
+            <div class="floor"></div>
+            <div class="hjar">
+              <div class="lid"></div>
+              <div class="body"></div>
+              <div class="label">
+                <small class="brand">MORROW</small>
+                <b>Plant<br>Protein</b>
+                <span class="sub">Vanilla · pea &amp; rice</span>
+                <span class="rule"></span>
+                <span class="facts"><i>24 g</i> protein per serving</span>
+                <div class="foot2">
+                  <span class="lotline">LOT <em id="jar-lot">A2416</em></span>
+                  <span class="net">NET WT 500 g</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="lots-pts">
+      <div class="pt"><h3>New reports, same flow</h3><p>Upload the next COA and it becomes a draft for the same product, ready for your team to check against the source.</p></div>
+      <div class="pt"><h3>History stays on record</h3><p>Earlier lots keep their results and original reports, so shoppers holding an older pack still find theirs.</p></div>
+      <div class="pt"><h3>Help with setup</h3><p>Our team works with you to set up your products and first reports, so the first published lot is right.</p></div>
+    </div>
+  </section>
+
+  <section class="who" id="who" aria-labelledby="who-title">
+    <div class="who-in">
+      <div class="who-top">
+        <div>
+          <span class="eyebrow">Who it’s for</span>
+          <h2 id="who-title">For brands that already test, <span>and want it to show.</span></h2>
+        </div>
+        <p>TrueBatch works with the lab reports you already commission. It isn’t a lab and doesn’t certify anything; it makes your results readable, reviewed and easy to find.</p>
+      </div>
+
+      <div class="cats" id="cats">
+        <article class="cat" style="--i:0">
+          <div class="cat-stage"><span class="cat-lot">Lot A2419</span><div class="prod p-tub" aria-hidden="true"><div class="lid"></div><div class="bd"></div><div class="lb">Plant<br>Protein</div></div></div>
+          <div class="cat-body"><h3>Sports nutrition &amp; protein</h3><span class="ex">Protein powders, pre-workouts, ready-to-drink shakes</span><div class="panels" aria-label="Common test panels"><span>Heavy metals</span><span>Nutrients</span></div></div>
+        </article>
+        <article class="cat" style="--i:1">
+          <div class="cat-stage"><span class="cat-lot">Lot M0712</span><div class="prod p-bottle" aria-hidden="true"><div class="cap"></div><div class="bd"></div><div class="lb">Daily<br>Magnesium</div></div></div>
+          <div class="cat-body"><h3>Supplements</h3><span class="ex">Capsules, gummies and powders</span><div class="panels" aria-label="Common test panels"><span>Heavy metals</span><span>Microbials</span><span>Pesticides</span></div></div>
+        </article>
+        <article class="cat" style="--i:2">
+          <div class="cat-stage"><span class="cat-lot">Lot P3381</span><div class="prod p-pouch" aria-hidden="true"><div class="sp"></div><div class="bd"></div><div class="lb">Pear &amp;<br>Oat<small>Stage 1 · 6m+</small></div><div class="fruit"></div></div></div>
+          <div class="cat-body"><h3>Baby food</h3><span class="ex">Purées, puffs and cereals</span><div class="panels" aria-label="Common test panels"><span>Heavy metals</span><span>Microbials</span></div></div>
+        </article>
+        <article class="cat" style="--i:3">
+          <div class="cat-stage"><span class="cat-lot">Lot V5520</span><div class="prod p-vit" aria-hidden="true"><div class="cap"></div><div class="bd"></div><div class="lb">Prenatal<small>60 tablets</small></div><i class="tabl" style="left:-18px"></i><i class="tabl" style="right:-20px;bottom:6px"></i></div></div>
+          <div class="cat-body"><h3>Prenatal &amp; family vitamins</h3><span class="ex">Prenatals, multivitamins, kids’ vitamins</span><div class="panels" aria-label="Common test panels"><span>Heavy metals</span><span>Nutrients</span></div></div>
+        </article>
+      </div>
+
+      <div class="roles" id="roles">
+        <div class="roles-head">
+          <span class="eyebrow">Across your team</span>
+          <h3>One record, read three ways.</h3>
+          <p>Founders, QA and ecommerce each get what they need from the same reviewed lab record.</p>
+          <nav class="role-pills" aria-label="Roles">
+            <a class="role-pill is-on" href="#role-founders" aria-current="true"><i>01</i>Founders</a>
+            <a class="role-pill" href="#role-qa"><i>02</i>QA &amp; operations</a>
+            <a class="role-pill" href="#role-ecom"><i>03</i>Ecommerce teams</a>
+          </nav>
+        </div>
+        <div class="rcards">
+          <article class="rcard" id="role-founders" aria-labelledby="rh-founders">
+            <span class="rnum">01 / Founders</span>
+            <h4 id="rh-founders">You already pay for testing. <span>Let shoppers actually see it.</span></h4>
+            <div class="rstage" aria-hidden="true">
+              <div class="prod p-tub rs-prod rv"><div class="lid"></div><div class="bd"></div><div class="lb">Plant<br>Protein</div></div>
+              <div class="rs-widget rv">
+                <div class="top"><b>Plant Protein / Vanilla</b><span class="lot">A2419</span></div>
+                <span class="sample">Illustrative sample</span>
+                <div class="rr"><b>Lead</b><span>3.2 <span class="u">ppb</span></span></div>
+                <div class="rr"><b>Arsenic</b><span>Not Detected</span></div>
+                <div class="rr"><b>Cadmium</b><span>1.1 <span class="u">ppb</span></span></div>
+                <div class="coa"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M4 1.5h5.5L13 5v9.5H4z"/><path d="M9.5 1.5V5H13M6 8.5h4.5M6 11h4.5"/></svg>View original lab report (PDF)</div>
+              </div>
+            </div>
+            <ul class="rpts"><li><b>Results, not a PDF link</b><span>Names, values, units and qualifiers people can read beside the product.</span></li><li><b>The original stays one click away</b><span>Every published lot links to the lab report it came from.</span></li><li><b>No claims you didn’t make</b><span>Results appear as reported, with no badges or “certified” language added.</span></li></ul>
+            <a class="rp-link" href="#surfaces">See what shoppers see <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M8 3v10M4 9l4 4 4-4"/></svg></a>
+          </article>
+
+          <article class="rcard" id="role-qa" aria-labelledby="rh-qa">
+            <span class="rnum">02 / QA &amp; operations</span>
+            <h4 id="rh-qa">Nothing goes live <span>until it matches the source.</span></h4>
+            <div class="rstage" aria-hidden="true">
+              <div class="rs-doc rv">
+                <div class="k"><em>PDF</em>Source document</div>
+                <h5>Laboratory analysis</h5>
+                <div class="m">Plant Protein · Vanilla / Lot A2419</div>
+                <div class="hd"><span>Analyte</span><span>Reported value</span></div>
+                <div class="ln3 hl"><span>Lead</span><b>3.2 ppb</b></div>
+                <div class="ln3"><span>Arsenic</span><b>ND</b></div>
+                <div class="ln3"><span>Report date</span><b>12 Sep 2026</b></div>
+                <div class="note">The original stays linked to the draft.</div>
+              </div>
+              <div class="rs-draft rv">
+                <div class="t"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 1.5v13M1.5 8h13M3.4 3.4l9.2 9.2M12.6 3.4l-9.2 9.2"/></svg>Structured draft</div>
+                <div class="ln3"><span>Lead</span><b>3.2 ppb</b></div>
+                <div class="ln3"><span>Arsenic</span><b>Not Detected</b></div>
+                <span class="wait"><i></i>Awaiting human review</span>
+              </div>
+            </div>
+            <ul class="rpts"><li><b>Side by side with the COA</b><span>Each extracted value is checked against its line in the original report.</span></li><li><b>Meaning kept intact</b><span>“Not Detected”, units and qualifiers stay exactly as the lab wrote them.</span></li><li><b>Lot matching</b><span>Results are tied to the right product and lot before they’re published.</span></li></ul>
+            <a class="rp-link" href="#how">See the review flow <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M8 3v10M4 9l4 4 4-4"/></svg></a>
+          </article>
+
+          <article class="rcard" id="role-ecom" aria-labelledby="rh-ecom">
+            <span class="rnum">03 / Ecommerce teams</span>
+            <h4 id="rh-ecom">Publish once. <span>Show it everywhere shoppers look.</span></h4>
+            <div class="rstage" aria-hidden="true">
+              <div class="rs-surfaces">
+                <div class="rs-tile pdp rv">
+                  <span class="lbl">Product page</span>
+                  <span class="ttl">Plant Protein / Vanilla</span>
+                  <div class="rr"><b>Lead</b><span>3.2 <span class="u">ppb</span></span></div>
+                  <div class="rr"><b>Arsenic</b><span>Not Detected</span></div>
+                  <div class="tbw-btn"><span class="lbl2"><span class="tb-badge">T</span>View lab results</span><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 8h10M9 4l4 4-4 4"/></svg></div>
+                </div>
+                <div class="rs-tile qrt rv"><span class="qr" data-qr></span><div><span class="lbl">On the pack</span><span class="ttl" style="display:block;margin-top:4px">Scan for lot A2419</span></div></div>
+                <div class="rs-tile rv"><span class="lbl">Lot lookup</span><div class="rs-look"><span class="f">A2419<i></i></span><span class="b">Look up</span></div></div>
+              </div>
+            </div>
+            <ul class="rpts"><li><b>Shopify product pages</b><span>A results widget beside the product, matched to the lot.</span></li><li><b>Results pages and QR</b><span>A public page per lot, and a code on the pack that opens it.</span></li><li><b>Optional lot lookup</b><span>Shoppers can type the lot number from their pack.</span></li></ul>
+            <a class="rp-link" href="#surfaces">See where results appear <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M8 3v10M4 9l4 4 4-4"/></svg></a>
+          </article>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="end" id="start" aria-labelledby="end-title" data-dark>
+    <div class="end-papers" id="end-papers" aria-hidden="true"></div>
+    <div class="end-in">
+      <div class="end-copy">
+        <span class="eyebrow">Get started</span>
+        <h2 id="end-title">Your lab reports are done. <br><span>Put them to work.</span></h2>
+        <p>Install TrueBatch on your Shopify store, upload a report you already have, and review it before anything is published.</p>
+        <div class="end-ctas">
+          <a class="btn btn--lg" href="#"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3 5h10l-.8 8.2a1 1 0 0 1-1 .8H4.8a1 1 0 0 1-1-.8L3 5Z"/><path d="M5.5 5V4a2.5 2.5 0 0 1 5 0v1"/></svg>Install on Shopify</a>
+          <a class="ghost" href="#how">See how it works <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M8 13V3M4 7l4-4 4 4"/></svg></a>
+        </div>
+      </div>
+
+      <div class="setup" id="setup">
+        <h3>Want a hand with setup?</h3>
+        <p>Tell us about your store and we’ll help set up your products and first reports.</p>
+        <form id="setup-form" novalidate>
+          <div class="field"><label for="f-email">Work email</label><input id="f-email" type="email" autocomplete="email" placeholder="you@yourbrand.com" required></div>
+          <div class="field"><label for="f-store">Shopify store</label><input id="f-store" type="text" placeholder="yourbrand.myshopify.com"></div>
+          <div class="field"><label for="f-cat">What do you sell?</label>
+            <select id="f-cat">
+              <option>Sports nutrition &amp; protein</option><option>Supplements</option><option>Baby food</option><option>Prenatal &amp; family vitamins</option><option>Something else</option>
+            </select></div>
+          <button class="btn submit" type="submit">Request setup help</button>
+          <span class="fine">We’ll only use this to contact you about setup.</span>
+        </form>
+        <div class="done" role="status"><b>Thanks, we’ll be in touch.</b><span>Have a recent lab report handy; it’s the best place to start.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="foot" data-dark>
+    <div class="foot-in">
+      <div class="foot-top">
+        <div><a class="logo" href="#">TrueBatch</a><p>Lab-results publishing for Shopify brands. Turn the reports you already have into reviewed, readable results.</p></div>
+        <nav class="foot-links" aria-label="Footer">
+          <div><b>Product</b><a href="#how">How it works</a><a href="#surfaces">Where results appear</a><a href="#lots">Recurring testing</a><a href="#who">Who it’s for</a></div>
+          <div><b>Get started</b><a href="#">Install on Shopify</a><a href="#setup">Setup help</a></div>
+        </nav>
+      </div>
+      <div class="foot-bottom">
+        <p>Results shown on this page are illustrative samples. TrueBatch publishes results as reported by your laboratory; it is not a testing laboratory and does not certify products.</p>
+        <span>© 2026 TrueBatch</span>
+      </div>
+    </div>
+  </footer>
+
+</main>
+
+<script>
+(() => {
+  const hero = document.getElementById('hero');
+  const papersEl = document.getElementById('papers');
+  const copy = document.getElementById('copy');
+  const hint = document.getElementById('hint');
+  const phone = document.getElementById('phone');
+  const screen = document.getElementById('screen');
+  const sheet = document.getElementById('sheet');
+  const caption = document.getElementById('caption');
+  const openBtn = document.getElementById('open');
+  const sheetFocusables = sheet.querySelectorAll('button, a');
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Scattered resting positions: x/y as fractions of the viewport from centre, r in degrees.
+  // Stack positions: small offsets so the pile still reads as many reports.
+  const LAYOUT = [
+    { x: -0.40, y: -0.30, r: -8,  sx: -0.010, sy:  0.010, sr: -5 },
+    { x: -0.13, y: -0.43, r:  4,  sx:  0.006, sy: -0.008, sr:  3 },
+    { x:  0.15, y: -0.40, r: -3,  sx: -0.004, sy:  0.004, sr: -2 },
+    { x:  0.40, y: -0.22, r: 10,  sx:  0.012, sy: -0.004, sr:  6 },
+    { x: -0.44, y:  0.10, r:  6,  sx: -0.014, sy:  0.006, sr:  4 },
+    { x:  0.44, y:  0.16, r: -12, sx:  0.010, sy:  0.012, sr: -7 },
+    { x: -0.30, y:  0.42, r: -14, sx: -0.006, sy: -0.010, sr:  8 },
+    { x: -0.05, y:  0.50, r:  3,  sx:  0.002, sy:  0.014, sr: -3 },
+    { x:  0.22, y:  0.44, r: 12,  sx:  0.008, sy:  0.002, sr:  2 },
+    { x:  0.41, y:  0.52, r: -4,  sx: -0.002, sy: -0.002, sr:  0 },
+  ];
+
+  const w = (pct, cls = '') => `<span class="ln ${cls}" style="width:${pct}%"></span>`;
+  const paperHTML = (seed) => {
+    let rows = '';
+    for (let i = 0; i < 7; i++) {
+      const a = 30 + ((seed * 7 + i * 13) % 22);
+      rows += `<div class="row">${w(a)}${w(14)}${w(18, i === 0 ? 'dk' : '')}</div>`;
+    }
+    return `
+      <div class="row"><span class="mark"></span><div style="flex:1;display:flex;flex-direction:column;gap:5px">${w(70, 'dk')}${w(45)}</div></div>
+      <div class="rule"></div>
+      ${w(62, 'hd')}
+      <div class="row">${w(28)}${w(22)}${w(26)}</div>
+      <div class="tbl">${rows}</div>
+      <div class="row" style="justify-content:space-between">${w(30)}${w(20, 'dk')}</div>`;
+  };
+
+  const papers = LAYOUT.map((l, i) => {
+    const el = document.createElement('div');
+    el.className = 'paper';
+    el.innerHTML = paperHTML(i + 1);
+    papersEl.appendChild(el);
+    return { el, ...l };
+  });
+
+  const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+  const seg = (p, a, b) => clamp((p - a) / (b - a));
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const ease = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; // easeInOutCubic
+  const out = t => 1 - Math.pow(1 - t, 4);
+
+  let target = 0, current = 0, live = false;
+
+  const measure = () => {
+    const r = hero.getBoundingClientRect();
+    target = clamp(-r.top / (hero.offsetHeight - innerHeight));
+  };
+
+  const setOpen = (open) => {
+    screen.classList.toggle('is-open', open);
+    sheet.setAttribute('aria-hidden', String(!open));
+    sheetFocusables.forEach(el => el.tabIndex = open ? 0 : -1);
+  };
+
+  const TAP_AT = 0.76, OPEN_AT = 0.81;
+  let autoOpen = false;
+  const sheetBody = sheet.querySelector('.sheet-body');
+
+  const render = (p0) => {
+    const p = clamp(p0 / 0.7); // first 70% of the scroll: scatter → pile → phone
+    const W = innerWidth, H = innerHeight;
+    const mobile = W < 700;
+
+    // 1 → converge into a pile, 2 → pile drops into the phone
+    const a = reduced ? 0 : ease(seg(p, 0.06, 0.46));
+    const b = reduced ? 0 : ease(seg(p, 0.46, 0.70));
+    const paperFade = reduced ? seg(p, 0.25, 0.55) : seg(p, 0.58, 0.70);
+
+    papers.forEach(o => {
+      const sxW = mobile ? 1.15 : 1;
+      let x = lerp(o.x * W * sxW, o.sx * W, a);
+      let y = lerp(o.y * H, o.sy * H, a);
+      let r = lerp(o.r, o.sr, a);
+      let s = lerp(1, mobile ? 1.15 : 1.1, a);
+      x = lerp(x, 0, b); y = lerp(y, H * 0.04, b); r = lerp(r, 0, b); s = lerp(s, 0.38, b);
+      o.el.style.transform = `translate3d(${x}px, ${y}px, 0) rotate(${r}deg) scale(${s})`;
+      o.el.style.opacity = 1 - paperFade;
+    });
+
+    const h = seg(p, 0.16, 0.32);
+    copy.style.opacity = 1 - h;
+    copy.style.transform = reduced ? 'none' : `translate3d(0, ${-h * 48}px, 0)`;
+    copy.style.pointerEvents = h > 0.5 ? 'none' : 'auto';
+    hint.style.opacity = 1 - seg(p, 0, 0.06);
+
+    const fit = Math.min(1, (H - (mobile ? 110 : 140)) / 660);
+    const c = reduced ? 1 : out(seg(p, 0.48, 0.76));
+    const py = reduced ? 10 : lerp(H * 0.5 + 330 * fit + 40, 0, c) + (mobile ? 16 : 10);
+    phone.style.opacity = reduced ? seg(p, 0.5, 0.65) : (p > 0.47 ? 1 : 0);
+    phone.style.transform = `translate3d(0, ${py}px, 0) scale(${fit * lerp(0.9, 1, c)})`;
+
+    caption.style.opacity = seg(p, 0.8, 0.95);
+
+    // last 30%: the widget is "tapped" by scroll, the results open, then read down the list
+    const press = p0 >= TAP_AT && p0 < OPEN_AT + 0.02;
+    openBtn.classList.toggle('is-press', press);
+    const wantOpen = p0 >= OPEN_AT;
+    if (wantOpen !== autoOpen) { autoOpen = wantOpen; setOpen(wantOpen); }
+    if (wantOpen) sheetBody.scrollTop = seg(p0, 0.9, 1) * (sheetBody.scrollHeight - sheetBody.clientHeight);
+
+    const nowLive = p0 > 0.72;
+    if (nowLive !== live) {
+      live = nowLive;
+      phone.classList.toggle('is-live', live);
+    }
+  };
+
+  // ---------- How it works: report → draft → review ----------
+  const howTrack = document.getElementById('how-track');
+  const desk = document.getElementById('desk');
+  const coa = document.getElementById('coa');
+  const drop = document.getElementById('drop');
+  const file = document.getElementById('file');
+  const fileBar = document.getElementById('file-bar');
+  const filePct = document.getElementById('file-pct');
+  const scan = document.getElementById('scan');
+  const draft = document.getElementById('draft');
+  const pill = document.getElementById('draft-pill');
+  const count = document.getElementById('count');
+  const approve = document.getElementById('approve');
+  const stepsEl = document.getElementById('steps');
+  const stepEls = [...stepsEl.querySelectorAll('.step')];
+  const stepNow = document.getElementById('step-now');
+  const link = document.getElementById('link');
+  const linkPath = link.querySelector('path');
+  const [dotA, dotB] = link.querySelectorAll('circle');
+  const byKey = (attr) => [...document.querySelectorAll(`[${attr}]`)].sort((a, b) => a.getAttribute(attr) - b.getAttribute(attr));
+  const srcs = byKey('data-src');
+  const dsts = byKey('data-dst');
+  const reviews = byKey('data-review');
+
+  const CHIP_TEXT = ['Plant Protein / Vanilla', 'A2419', '12 Sep 2026', 'Lead · 3.2 ppb', 'Arsenic · ND', 'Cadmium · 1.1 ppb', 'Mercury · <0.5 ppb'];
+  const chipsEl = document.getElementById('chips');
+  const chips = CHIP_TEXT.map(t => {
+    const el = document.createElement('div');
+    el.className = 'chip';
+    el.textContent = t;
+    chipsEl.appendChild(el);
+    return el;
+  });
+
+  // Timeline (fractions of the pinned scroll)
+  const STEP_ENDS = [0.23, 0.59];
+  const flyAt = i => 0.26 + i * 0.042, FLY = 0.07;
+  const reviewAt = j => 0.62 + j * 0.055, REVIEW = 0.05;
+  const DONE = 0.94;
+
+  // Offsets ignore transforms, so geometry stays stable while the report drops in.
+  const offsetIn = (el, anc) => {
+    let x = 0, y = 0;
+    while (el && el !== anc) { x += el.offsetLeft; y += el.offsetTop; el = el.offsetParent; }
+    return { x, y };
+  };
+  let geo = [];
+  const measureGeo = () => {
+    geo = srcs.map((s, i) => {
+      const a = offsetIn(s, desk), d = dsts[i], b = offsetIn(d, desk);
+      const cw = chips[i].offsetWidth, ch = chips[i].offsetHeight;
+      const inset = d.classList.contains('drow') ? (innerWidth < 900 ? 12 : 16) : 0;
+      return {
+        sx: a.x + s.offsetWidth / 2, sy: a.y + s.offsetHeight / 2, sRight: a.x + s.offsetWidth,
+        dx: b.x + inset + cw / 2, dy: b.y + d.offsetHeight / 2, dLeft: b.x, cw, ch,
+      };
+    });
+  };
+
+  let howTarget = 0, howCurrent = 0;
+  const measureHow = () => {
+    const r = howTrack.getBoundingClientRect();
+    howTarget = clamp(-r.top / (howTrack.offsetHeight - innerHeight));
+  };
+
+  const last = {};
+  const setOnce = (key, value, apply) => { if (last[key] !== value) { last[key] = value; apply(value); } };
+
+  const renderHow = (p) => {
+    // 01 Upload: the report drops into the zone and uploads
+    const d = reduced ? (p > 0.02 ? 1 : 0) : out(seg(p, 0.02, 0.12));
+    coa.style.opacity = d;
+    coa.style.transform = `translate3d(0, ${(1 - d) * -48}px, 0) rotate(${(1 - d) * -4}deg)`;
+    const up = seg(p, 0.10, 0.21);
+    fileBar.style.width = `${up * 100}%`;
+    setOnce('pct', Math.round(up * 100), v => filePct.textContent = `${v}%`);
+    file.style.opacity = 1 - seg(p, 0.22, 0.27);
+    drop.style.opacity = 1 - seg(p, 0.20, 0.26);
+    draft.style.opacity = lerp(0.45, 1, seg(p, 0.20, 0.26));
+
+    // 02 Extract: a scan passes over the report and each field lifts into the draft
+    const s = seg(p, 0.25, 0.56);
+    scan.style.opacity = s > 0 && s < 1 ? 1 : 0;
+    scan.style.transform = `translate3d(0, ${s * (coa.offsetHeight - 2)}px, 0)`;
+
+    chips.forEach((chip, i) => {
+      const g = geo[i]; if (!g) return;
+      const t = seg(p, flyAt(i), flyAt(i) + FLY);
+      if (reduced || t <= 0 || t >= 1) { chip.style.opacity = 0; }
+      else {
+        const e = ease(t);
+        const x = lerp(g.sx, g.dx, e), y = lerp(g.sy, g.dy, e) - Math.sin(e * Math.PI) * 36;
+        chip.style.opacity = Math.min(1, t * 8, (1 - t) * 8);
+        chip.style.transform = `translate3d(${x - g.cw / 2}px, ${y - g.ch / 2}px, 0)`;
+      }
+      const filled = p >= flyAt(i) + FLY * 0.9;
+      dsts[i].classList.toggle('is-filled', filled);
+      dsts[i].classList.toggle('is-flagged', filled && dsts[i].hasAttribute('data-flag'));
+      srcs[i].classList.toggle('is-read', p >= flyAt(i) && p < STEP_ENDS[1]);
+    });
+
+    // 03 Review: each field is checked against its source line
+    let active = -1, checked = 0;
+    reviews.forEach((r, j) => {
+      const isChecked = p >= reviewAt(j) + REVIEW * 0.8;
+      const isFocus = p >= reviewAt(j) && p < reviewAt(j) + REVIEW + 0.005;
+      if (isChecked) checked++;
+      if (isFocus) active = j;
+      r.classList.toggle('is-checked', isChecked);
+      r.classList.toggle('is-focus', isFocus);
+      srcs[+r.dataset.dst].classList.toggle('is-focus', isFocus);
+    });
+    if (active >= 0 && geo.length) {
+      const g = geo[+reviews[active].dataset.dst];
+      const x1 = g.sRight + 6, x2 = g.dLeft - 6, mx = (x1 + x2) / 2;
+      linkPath.setAttribute('d', `M${x1},${g.sy} C${mx},${g.sy} ${mx},${g.dy} ${x2},${g.dy}`);
+      dotA.setAttribute('cx', x1); dotA.setAttribute('cy', g.sy);
+      dotB.setAttribute('cx', x2); dotB.setAttribute('cy', g.dy);
+      link.style.opacity = 1;
+    } else link.style.opacity = 0;
+    setOnce('count', checked, v => count.textContent = `${v} of ${reviews.length} checked`);
+
+    const stage = p < 0.10 ? 0 : p < STEP_ENDS[0] ? 1 : p < STEP_ENDS[1] ? 2 : p < DONE ? 3 : 4;
+    setOnce('pill', stage, v => {
+      pill.textContent = ['Waiting for report', 'Uploading', 'Extracting', 'In review', 'Approved'][v];
+      pill.classList.toggle('is-review', v === 3);
+      pill.classList.toggle('is-done', v === 4);
+    });
+    setOnce('approve', checked === reviews.length ? (p >= DONE ? 2 : 1) : 0, v => {
+      approve.classList.toggle('is-ready', v === 1);
+      approve.classList.toggle('is-done', v === 2);
+      approve.textContent = v === 2 ? 'Approved · ready to publish' : 'Approve & publish';
+    });
+
+    const k = p < STEP_ENDS[0] ? 0 : p < STEP_ENDS[1] ? 1 : 2;
+    setOnce('step', k, v => {
+      stepEls.forEach((el, i) => el.classList.toggle('is-active', i === v));
+      stepNow.textContent = stepEls[v].querySelector('.step-desc').textContent;
+    });
+    stepsEl.style.setProperty('--rail', clamp(p / 0.9));
+  };
+
+  // ---------- Where results appear: headline + card rail ----------
+  const showTrack = document.getElementById('show-track');
+  const showHead = document.getElementById('show-head');
+  const showRow = document.getElementById('show-row');
+  const showUi = document.getElementById('show-ui');
+  const showN = document.getElementById('show-n');
+  const showBar = document.getElementById('show-bar');
+  const showName = document.getElementById('show-name');
+  const scards = [...showRow.querySelectorAll('.scard')];
+
+  // Decorative QR (not scannable): three finder squares plus a fixed pseudo-random fill.
+  const qrSVG = () => {
+    const N = 21; let seed = 7, cells = '';
+    const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+    const finder = (x, y) => (x < 7 && y < 7) || (x > 13 && y < 7) || (x < 7 && y > 13);
+    for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+      let on;
+      if (finder(x, y)) {
+        const fx = x > 13 ? x - 14 : x, fy = y > 13 ? y - 14 : y;
+        on = fx === 0 || fx === 6 || fy === 0 || fy === 6 || (fx >= 2 && fx <= 4 && fy >= 2 && fy <= 4);
+      } else on = rnd() > 0.52;
+      if (on) cells += `<rect x="${x}" y="${y}" width="1" height="1"/>`;
+    }
+    return `<svg viewBox="0 0 ${N} ${N}" shape-rendering="crispEdges" fill="#0A2120">${cells}</svg>`;
+  };
+  document.querySelectorAll('[data-qr]').forEach(el => el.innerHTML = qrSVG());
+
+  let show = { travel: 0, restY: 0, upY: 0 };
+  const layoutShow = () => {
+    const W = innerWidth, H = innerHeight, mobile = W < 700;
+    const g = showRow.offsetLeft;
+    const gap = parseFloat(getComputedStyle(showRow).columnGap) || 24;
+    const cw = mobile ? Math.round(W * 0.84) : Math.round(Math.min(700, (W - 2 * g - gap) / 2.12));
+    // card height follows the store mock so it bleeds just past the bottom edge
+    const mockTop = mobile ? 150 : 164, mockLeft = mobile ? 20 : 24;
+    const mockH = (cw - mockLeft) / 720 * 460;
+    const ch = Math.round(Math.min(H * (mobile ? 0.66 : 0.72), mockTop + mockH - 24));
+    showRow.style.setProperty('--cw', `${cw}px`);
+    showRow.style.setProperty('--ch', `${ch}px`);
+    scards.forEach(c => {
+      const m = c.querySelector('.mock');
+      c.querySelector('.mock-in').style.setProperty('--ms', (m.clientWidth + 10) / 720);
+    });
+    show = {
+      travel: Math.max(0, showRow.scrollWidth - (W - 2 * g)),
+      restY: H * (mobile ? 0.6 : 0.64),
+      upY: Math.max(mobile ? 72 : 96, Math.min(H - ch - (mobile ? 52 : 64), H * (mobile ? 0.28 : 0.34))),
+    };
+  };
+
+  let showTarget = 0, showCurrent = 0, showIdx = -1;
+  const measureShow = () => {
+    const r = showTrack.getBoundingClientRect();
+    showTarget = clamp(-r.top / (showTrack.offsetHeight - innerHeight));
+  };
+
+  const NAMES = scards.map(c => c.querySelector('h3').textContent);
+  const renderShow = (p) => {
+    // rise: cards slide up over the headline, which steps back
+    const up = reduced ? 1 : ease(seg(p, 0.04, 0.3));
+    const dim = seg(p, 0.04, 0.3);
+    showHead.style.opacity = lerp(1, 0.16, dim);
+    showHead.style.transform = reduced ? 'none' : `translate3d(0, ${-dim * 28}px, 0) scale(${lerp(1, 0.96, dim)})`;
+    // travel: the row moves sideways to the last card
+    const t = reduced ? seg(p, 0.3, 0.95) : ease(seg(p, 0.32, 0.95));
+    const y = lerp(show.restY, show.upY, up);
+    showRow.style.transform = `translate3d(${-t * show.travel}px, ${y}px, 0)`;
+    showUi.style.opacity = seg(p, 0.24, 0.32);
+    showUi.style.transform = `translate3d(0, ${(1 - seg(p, 0.24, 0.32)) * 8}px, 0)`;
+    showBar.style.transform = `scaleX(${lerp(0.25, 1, t)})`;
+    const k = Math.min(scards.length - 1, Math.round(t * (scards.length - 1)));
+    if (k !== showIdx) {
+      showIdx = k;
+      showN.textContent = String(k + 1).padStart(2, '0');
+      showName.textContent = NAMES[k];
+    }
+  };
+
+    // ---------- Recurring testing: each batch brings a report, filed behind the product ----------
+  const lotsTrack = document.getElementById('lots-track');
+  const lotsSec = document.getElementById('lots');
+  const lotsScene = document.getElementById('lots-scene');
+  const lotsWrap = document.getElementById('lots-wrap');
+  const hpsEl = document.getElementById('hps');
+  const jarLot = document.getElementById('jar-lot');
+  const lnCode = document.getElementById('ln-code');
+  const lnMeta = document.getElementById('ln-meta');
+  const lnChip = document.getElementById('ln-chip');
+  const ticks = [...document.querySelectorAll('#lot-ticks i')];
+  const navEl = document.querySelector('.nav');
+
+  const LOTS = [
+    { code: 'A2416', date: '12 Jun 2026', lead: '2.9', cd: '1.0' },
+    { code: 'A2417', date: '10 Jul 2026', lead: '3.4', cd: '0.9' },
+    { code: 'A2418', date: '14 Aug 2026', lead: '3.0', cd: '1.2' },
+    { code: 'A2419', date: '12 Sep 2026', lead: '3.2', cd: '1.1' },
+    { code: 'A2420', date: '09 Oct 2026', lead: '3.1', cd: '1.0', fresh: true },
+  ];
+  // filed position for each report: newer ones sit lower, so every older lot's tab still peeks out above
+  const FILED = LOTS.map((_, i) => ({ x: -44 + i * 20, y: -92 + i * 13, r: -6 + i * 2.5 }));
+  const hps = LOTS.map((l, i) => {
+    const el = document.createElement('div');
+    el.className = 'hp' + (l.fresh ? ' new' : '');
+    el.style.zIndex = 1 + i;
+    el.innerHTML = `
+      <span class="tab" style="left:${12 + i * 36}px">${l.code}</span>
+      <div class="h"><i></i><span class="t">Certificate of Analysis</span></div>
+      <span class="m">Plant Protein / Vanilla · Lot ${l.code}</span>
+      <span class="m">${l.fresh ? 'Received' : 'Reported'} ${l.date}</span>
+      <div class="rule"></div>
+      <div class="row"><span>Lead</span><b>${l.lead} ppb</b></div>
+      <div class="row"><span>Arsenic</span><b>ND</b></div>
+      <div class="row"><span>Cadmium</span><b>${l.cd} ppb</b></div>
+      <div class="row"><span>Mercury</span><b>&lt;0.5 ppb</b></div>
+      <div class="rule"></div>
+      <span class="ln" style="width:80%"></span><span class="ln" style="width:64%"></span><span class="ln" style="width:72%"></span>`;
+    hpsEl.appendChild(el);
+    return el;
+  });
+
+  const STEP0 = 0.06, STEP = 0.17, FLIGHT = 0.12;
+  const fitLots = () => {
+    const mobile = innerWidth <= 900;
+    const availW = mobile ? innerWidth - 32 : lotsWrap.parentElement.clientWidth - 420 - 48;
+    const availH = mobile ? innerHeight - 250 : innerHeight - 140;
+    const sc = Math.max(0.45, Math.min(1.1, availW / 600, availH / 560));
+    lotsScene.style.transform = `scale(${sc})`;
+    lotsWrap.style.width = `${600 * sc}px`;
+    lotsWrap.style.height = `${560 * sc}px`;
+  };
+
+  let lotsTarget = 0, lotsCurrent = 0, lotIdx = -1, lotState = '';
+  const measureLots = () => {
+    const r = lotsTrack.getBoundingClientRect();
+    lotsTarget = clamp(-r.top / (lotsTrack.offsetHeight - innerHeight));
+    const sr = lotsSec.getBoundingClientRect();
+    const over = (el) => { const b = el.getBoundingClientRect(); return b.top <= 36 && b.bottom > 36; };
+    navEl.classList.toggle('on-dark', over(lotsSec) || darkZones.some(over));
+  };
+
+  const renderLots = (p) => {
+    let k = 0;
+    hps.forEach((el, i) => {
+      const s = STEP0 + i * STEP;
+      if (p >= s) k = i;
+      const t = reduced ? (p >= s ? 1 : 0) : ease(seg(p, s, s + FLIGHT));
+      const f = FILED[i];
+      // fly in from above-right, then settle into the file behind the product
+      const x = lerp(340, f.x, t), y = lerp(-460, f.y, t) - Math.sin(t * Math.PI) * 40;
+      const r = lerp(22, f.r, t);
+      const sc = lerp(1.08, 1, t);
+      const newer = clamp((p - (s + STEP)) / STEP); // older reports recede a little as new ones land
+      el.style.transform = `translate3d(${x}px, ${y}px, 0) rotate(${r}deg) scale(${sc})`;
+      el.style.opacity = t <= 0 ? 0 : Math.min(1, t * 4);
+      el.style.filter = LOTS[i].fresh ? 'none' : `brightness(${lerp(1, 0.86, newer)})`;
+    });
+
+    const s = STEP0 + k * STEP;
+    const landed = p >= s + FLIGHT;
+    const fresh = !!LOTS[k].fresh;
+    const state = fresh ? (p >= s + FLIGHT + 0.04 ? 'review' : 'new') : (landed ? 'pub' : 'arriving');
+    if (k !== lotIdx) {
+      lotIdx = k;
+      lnCode.textContent = LOTS[k].code;
+      // the jar's printed lot flips to the new batch
+      jarLot.classList.add('flip');
+      jarLot.textContent = LOTS[k].code;
+      requestAnimationFrame(() => requestAnimationFrame(() => jarLot.classList.remove('flip')));
+      ticks.forEach((tk, i) => tk.classList.toggle('on', i <= k));
+    }
+    if (`${k}:${state}` !== lotState) {
+      lotState = `${k}:${state}`;
+      lnMeta.textContent = (fresh ? 'Received ' : 'Tested ') + LOTS[k].date;
+      lnChip.textContent = { pub: 'Published', arriving: 'Report arriving', new: 'New report', review: 'Draft ready for review' }[state];
+      lnChip.classList.toggle('is-new', state === 'new' || state === 'arriving');
+      lnChip.classList.toggle('is-review', state === 'review');
+    }
+  };
+
+    // ---------- Who it's for ----------
+  const cats = [...document.querySelectorAll('.cat')];
+  if ('IntersectionObserver' in window && !reduced) {
+    const io = new IntersectionObserver(es => es.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('is-in'); io.unobserve(e.target); }
+    }), { threshold: 0.25 });
+    cats.forEach(c => io.observe(c));
+  } else cats.forEach(c => c.classList.add('is-in'));
+
+  // ---------- Across your team: pills follow the card in view; clicking a pill scrolls to its card ----------
+  const rolePills = [...document.querySelectorAll('.role-pill')];
+  const rcards = [...document.querySelectorAll('.rcard')];
+  const setRole = (id) => rolePills.forEach(p => {
+    const on = p.getAttribute('href') === `#${id}`;
+    p.classList.toggle('is-on', on);
+    if (on) p.setAttribute('aria-current', 'true'); else p.removeAttribute('aria-current');
+  });
+  rolePills.forEach(p => p.addEventListener('click', e => {
+    e.preventDefault();
+    const card = document.querySelector(p.getAttribute('href'));
+    setRole(card.id);
+    card.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: innerWidth > 900 ? 'center' : 'start' });
+  }));
+  if ('IntersectionObserver' in window) {
+    const spy = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) setRole(e.target.id); }), { rootMargin: '-45% 0px -50% 0px' });
+    const reveal = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('is-in'); reveal.unobserve(e.target); } }), { threshold: 0.3 });
+    rcards.forEach(c => { spy.observe(c); reduced ? c.classList.add('is-in') : reveal.observe(c); });
+  } else rcards.forEach(c => c.classList.add('is-in'));
+
+  // ---------- Closing: faint reports drift past at different speeds (a quiet echo of the hero) ----------
+  const endSec = document.getElementById('start');
+  const endPapersEl = document.getElementById('end-papers');
+  const END_PAPERS = [
+    { l: 4, t: 8, r: -9, v: 0.18 }, { l: 22, t: 70, r: 6, v: 0.32 }, { l: 46, t: -6, r: 3, v: 0.12 },
+    { l: 62, t: 78, r: -5, v: 0.26 }, { l: 84, t: 12, r: 10, v: 0.22 }, { l: 92, t: 60, r: -12, v: 0.36 },
+  ];
+  const endPapers = END_PAPERS.map(o => {
+    const el = document.createElement('div');
+    el.className = 'end-paper';
+    el.style.left = `${o.l}%`; el.style.top = `${o.t}%`;
+    el.innerHTML = '<i style="width:60%"></i><i style="width:40%"></i><i></i><i></i><i style="width:80%"></i><i></i><i style="width:70%"></i>';
+    endPapersEl.appendChild(el);
+    return { el, ...o };
+  });
+  const renderEnd = () => {
+    const r = endSec.getBoundingClientRect();
+    if (r.bottom < 0 || r.top > innerHeight) return;
+    const d = reduced ? 0 : (innerHeight / 2 - (r.top + r.height / 2));
+    endPapers.forEach(o => o.el.style.transform = `translate3d(0, ${d * o.v}px, 0) rotate(${o.r + d * o.v * 0.02}deg)`);
+  };
+
+  const setup = document.getElementById('setup');
+  const setupForm = document.getElementById('setup-form');
+  const fEmail = document.getElementById('f-email');
+  // prototype only: nothing is sent anywhere
+  setupForm.addEventListener('submit', e => {
+    e.preventDefault();
+    if (!fEmail.checkValidity()) { fEmail.focus(); fEmail.reportValidity(); return; }
+    setup.classList.add('is-sent');
+  });
+
+  const darkZones = [...document.querySelectorAll('[data-dark]')];
+
+  // ---------- Header: one joined pill at the top, split to the edges on scroll ----------
+  const navLogo = document.getElementById('nav-logo');
+  const navCta = document.getElementById('nav-cta');
+  let navGeo = null, navSplit = null;
+  const layoutNav = () => {
+    navLogo.style.width = 'auto';
+    const wl = navLogo.offsetWidth, wc = navCta.offsetWidth;
+    const g = innerWidth > 700 ? parseFloat(getComputedStyle(document.querySelector('.lots-pts')).paddingLeft) || 24 : 12;
+    navGeo = { wl, wc, g };
+    navSplit = null; renderNav();
+  };
+  const renderNav = () => {
+    if (!navGeo) return;
+    const split = scrollY > 40;
+    if (split === navSplit) return;
+    navSplit = split;
+    const { wl, wc, g } = navGeo, W = innerWidth;
+    navEl.classList.toggle('is-joined', !split);
+    if (split) {
+      navLogo.style.width = `${wl}px`;
+      navLogo.style.transform = `translateX(${g}px)`;
+      navCta.style.transform = `translateX(${W - g - wc}px)`;
+    } else {
+      const x0 = (W - wl - wc) / 2;
+      navLogo.style.width = `${wl + wc}px`;
+      navLogo.style.transform = `translateX(${x0}px)`;
+      navCta.style.transform = `translateX(${x0 + wl}px)`;
+    }
+  };
+
+  // ---------- Sample QR chip: shows between the hero and the closing section ----------
+  const qrChip = document.getElementById('qr-chip');
+  const heroEl = document.getElementById('hero');
+  const renderQrChip = () => {
+    const pastHero = heroEl.getBoundingClientRect().bottom < innerHeight * 0.5;
+    const beforeEnd = endSec.getBoundingClientRect().top > innerHeight * 0.6;
+    qrChip.classList.toggle('is-on', pastHero && beforeEnd);
+  };
+
+  const tick = () => {
+    current = reduced ? target : lerp(current, target, 0.14);
+    if (Math.abs(current - target) < 0.0005) current = target;
+    render(current);
+    howCurrent = reduced ? howTarget : lerp(howCurrent, howTarget, 0.14);
+    if (Math.abs(howCurrent - howTarget) < 0.0005) howCurrent = howTarget;
+    renderHow(howCurrent);
+    showCurrent = reduced ? showTarget : lerp(showCurrent, showTarget, 0.14);
+    if (Math.abs(showCurrent - showTarget) < 0.0005) showCurrent = showTarget;
+    renderShow(showCurrent);
+    lotsCurrent = reduced ? lotsTarget : lerp(lotsCurrent, lotsTarget, 0.14);
+    if (Math.abs(lotsCurrent - lotsTarget) < 0.0005) lotsCurrent = lotsTarget;
+    renderLots(lotsCurrent);
+    requestAnimationFrame(tick);
+  };
+
+  openBtn.addEventListener('click', () => setOpen(true));
+  document.getElementById('close').addEventListener('click', () => { setOpen(false); openBtn.focus(); });
+  document.getElementById('scrim').addEventListener('click', () => setOpen(false));
+  addEventListener('keydown', e => { if (e.key === 'Escape') setOpen(false); });
+  addEventListener('scroll', () => { measure(); measureHow(); measureShow(); measureLots(); renderEnd(); renderNav(); renderQrChip(); }, { passive: true });
+  addEventListener('resize', () => { measure(); measureHow(); measureGeo(); layoutShow(); measureShow(); fitLots(); measureLots(); layoutNav(); });
+  document.fonts.ready.then(() => { measureGeo(); layoutShow(); layoutNav(); });
+
+  layoutShow(); measureShow(); showCurrent = showTarget; renderShow(showCurrent);
+  fitLots(); measureLots(); lotsCurrent = lotsTarget; renderLots(lotsCurrent);
+  measure(); current = target; render(current);
+  measureGeo(); measureHow(); howCurrent = howTarget; renderHow(howCurrent);
+  renderEnd();
+  layoutNav(); renderQrChip();
+  requestAnimationFrame(tick);
+})();
+</script>
+</body>
+</html>

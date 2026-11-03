@@ -1,0 +1,10 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "truebatch-static",
+      "url": "http://127.0.0.1:5178",
+      "port": 5178
+    }
+  ]
+}
